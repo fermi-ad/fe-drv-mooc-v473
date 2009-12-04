@@ -13,12 +13,13 @@ namespace V473 {
 	uint16_t* mailbox;
 	uint16_t* count;
 	uint16_t* readWrite;
-	uint16_t* reset;
+	uint16_t* resetAddr;
 
 	uint16_t* irqEnable;
 	uint16_t* irqSource;
 	uint16_t* irqMask;
 	uint16_t* irqStatus;
+
 	// No copying!
 
 	Card();
@@ -45,9 +46,26 @@ namespace V473 {
 	bool readProperty(vwpp::Lock const&, uint16_t, size_t);
 	bool setProperty(vwpp::Lock const&, uint16_t, size_t);
 
+	static void gblIntHandler(Card*);
+
+	void intHandler();
+
+     protected:
+	virtual void handleCommandErr();
+	virtual void handleCalculationErr();
+	virtual void handleMissingTCLK();
+	virtual void handlePSTrackingErr();
+	virtual void handlePS0Err();
+	virtual void handlePS1Err();
+	virtual void handlePS2Err();
+	virtual void handlePS3Err();
+
      public:
 	Card(uint8_t, uint8_t);
-	~Card();
+	virtual ~Card();
+
+	void reset() { *resetAddr = 0; }
+	void generateInterrupts(bool);
     };
 
     typedef Card* HANDLE;

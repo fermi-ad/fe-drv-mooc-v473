@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <vme.h>
 #include <sysLib.h>
+#include <iv.h>
 #include <intLib.h>
 #include <taskLib.h>
 
@@ -31,7 +32,7 @@ static void term()
 
 using namespace V473;
 
-Card::Card(uint8_t addr, uint8_t)
+Card::Card(uint8_t addr, uint8_t intVec)
 {
     char* baseAddr;
 
@@ -47,7 +48,7 @@ Card::Card(uint8_t addr, uint8_t)
     mailbox = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffa);
     count = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffc);
     readWrite = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffe);
-    reset = reinterpret_cast<uint16_t*>(baseAddr + 0xfffe);
+    resetAddr = reinterpret_cast<uint16_t*>(baseAddr + 0xfffe);
     irqEnable = reinterpret_cast<uint16_t*>(baseAddr + 0x8000);
     irqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x8002);
     irqMask = reinterpret_cast<uint16_t*>(baseAddr + 0x8004);
@@ -64,16 +65,62 @@ Card::Card(uint8_t addr, uint8_t)
     if (sysIn16(readWrite) != 2 || sysIn16(count) != 3 || sysIn16(dataBuffer) != 473)
 	throw std::runtime_error("VME A16 address doesn't refer to V473 hardware");
 
-    logInform3(hLog, "V473: Found hardware -- addr %p, Firmware v%04x, FPGA v%04x",
-	       dataBuffer, sysIn16(dataBuffer + 1), sysIn16(dataBuffer + 2));
+    logInform5(hLog, "V473: Found hardware -- addr %p, Firmware v%d.%d, FPGA v%d.%d",
+	       dataBuffer, sysIn16(dataBuffer + 1) >> 4, sysIn16(dataBuffer + 1) & 0xf,
+	       sysIn16(dataBuffer + 2) >> 4, sysIn16(dataBuffer + 2) & 0xf);
 
-    // XXX: Now that we know we're a V473, we can attach the interrupt
+    // Now that we know we're a V473, we can attach the interrupt
     // handler.
+
+    if (OK != intConnect(INUM_TO_IVEC((int) intVec),
+			 reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
+			 reinterpret_cast<int>(this)))
+	throw std::runtime_error("cannot connect V473 hardware to interrupt vector");
+    sysOut16(irqMask, 0xd21f);
+    sysOut16(irqStatus, intVec);
 }
 
 Card::~Card()
 {
     // XXX: Shut down interrupts and shut off the hardware.
+}
+
+void Card::gblIntHandler(Card* const ptr)
+{
+    ptr->intHandler();
+}
+
+void Card::intHandler()
+{
+    uint16_t const sts = sysIn16(irqSource);
+
+    if (sts & 0x8000)
+	handleCommandErr();
+    if (sts & 0x4000)
+	handleCalculationErr();
+    if (sts & 0x1000)
+	handleMissingTCLK();
+    if (sts & 0x200)
+	handlePSTrackingErr();
+    if (sts & 0x10)
+	intDone.wakeOne();
+    if (sts & 0x8)
+	handlePS3Err();
+    if (sts & 0x4)
+	handlePS2Err();
+    if (sts & 0x2)
+	handlePS1Err();
+    if (sts & 0x1)
+	handlePS0Err();
+
+    // Clear the status bits.
+
+    sysOut16(irqSource, sts);
+}
+
+void Card::generateInterrupts(bool flg)
+{
+    sysOut16(irqEnable, flg ? 1 : 0);
 }
 
 // Sends the mailbox value, the word count and the READ command to the
