@@ -1,12 +1,14 @@
 // $Id$
 
 #include <vxWorks.h>
+#include <stdexcept>
 #include <vwpp-0.1.h>
 
 namespace V473 {
 
     class Card {
-	vwpp::Mutex mutex;
+	uint8_t const vecNum;
+
 	vwpp::Event intDone;
 
 	uint16_t *dataBuffer;
@@ -43,8 +45,38 @@ namespace V473 {
 	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39
 	};
 
+	enum SineMode {
+	    smOff = 0, smFixed = 1, smSweep = 3, smFixedLoop = 5,
+	    smSweepLoop = 7
+	};
+
+	// Most addresses in the V473 memory map have the same bit
+	// layout, so this function computes the address for a
+	// channel's property with an optional interrupt level.
+
+	uint16_t GEN_ADDR(uint16_t const chan, ChannelProperty const prop,
+			  uint16_t const intLvl = 0) const
+	{
+	    if (chan >= 4)
+		throw std::logic_error("channel out of range");
+	    if (intLvl >= 32)
+		throw std::logic_error("interrupt level out of range");
+	    return 0x1000 * chan + prop + intLvl;
+	}
+
+	// These functions set up the transaction registers.
+
 	bool readProperty(vwpp::Lock const&, uint16_t, size_t);
 	bool setProperty(vwpp::Lock const&, uint16_t, size_t);
+
+	// Many properties in the V473 are in banks of 32 values.
+	// These functions grab any subset of a bank of values. If the
+	// range is invalid, a logic_error exception will be thrown.
+
+	bool readBank(vwpp::Lock const&, uint16_t, ChannelProperty, uint16_t,
+		      uint16_t*, uint16_t);
+	bool writeBank(vwpp::Lock const&, uint16_t, ChannelProperty, uint16_t,
+		       uint16_t const*, uint16_t);
 
 	static void gblIntHandler(Card*);
 
@@ -61,19 +93,201 @@ namespace V473 {
 	virtual void handlePS3Err();
 
      public:
+	vwpp::Mutex mutex;
+
 	Card(uint8_t, uint8_t);
 	virtual ~Card();
 
 	void reset() { *resetAddr = 0; }
 	void generateInterrupts(bool);
+
+	bool getDelays(vwpp::Lock const& lock, uint16_t const chan,
+		       uint16_t const intLvl, uint16_t* const ptr,
+		       uint16_t const n)
+	{
+	    return readBank(lock, chan, cpDelays, intLvl, ptr, n);
+	}
+
+	bool getFrequencies(vwpp::Lock const& lock, uint16_t const chan,
+			    uint16_t const intLvl, uint16_t* const ptr,
+			    uint16_t const n)
+	{
+	    return readBank(lock, chan, cpFrequencies, intLvl, ptr, n);
+	}
+
+	bool getFrequencyMap(vwpp::Lock const& lock, uint16_t const chan,
+			     uint16_t const intLvl, uint16_t* const ptr,
+			     uint16_t const n)
+	{
+	    return readBank(lock, chan, cpFrequencyMap, intLvl, ptr, n);
+	}
+
+	bool getOffsetMap(vwpp::Lock const& lock, uint16_t const chan,
+			  uint16_t const intLvl, uint16_t* const ptr,
+			  uint16_t const n)
+	{
+	    return readBank(lock, chan, cpOffsetMap, intLvl, ptr, n);
+	}
+
+	bool getOffsets(vwpp::Lock const& lock, uint16_t const chan,
+			uint16_t const intLvl, uint16_t* const ptr,
+			uint16_t const n)
+	{
+	    return readBank(lock, chan, cpOffsets, intLvl, ptr, n);
+	}
+
+	bool getPhaseMap(vwpp::Lock const& lock, uint16_t const chan,
+			 uint16_t const intLvl, uint16_t* const ptr,
+			 uint16_t const n)
+	{
+	    return readBank(lock, chan, cpPhaseMap, intLvl, ptr, n);
+	}
+
+	bool getPhases(vwpp::Lock const& lock, uint16_t const chan,
+		       uint16_t const intLvl, uint16_t* const ptr,
+		       uint16_t const n)
+	{
+	    return readBank(lock, chan, cpPhases, intLvl, ptr, n);
+	}
+
+	bool getRamp(vwpp::Lock const& lock, uint16_t const chan,
+		     uint16_t const ramp, uint16_t* const ptr,
+		     uint16_t const n)
+	{
+	    return readBank(lock, chan,
+			    (ChannelProperty) ((ramp << 7) + 0x1000 * chan),
+			    0, ptr, n);
+	}
+
+	bool getRampMap(vwpp::Lock const& lock, uint16_t const chan,
+			uint16_t const intLvl, uint16_t* const ptr,
+			uint16_t const n)
+	{
+	    return readBank(lock, chan, cpRampMap, intLvl, ptr, n);
+	}
+
+	bool getScaleFactorMap(vwpp::Lock const& lock, uint16_t const chan,
+			       uint16_t const intLvl, uint16_t* const ptr,
+			       uint16_t const n)
+	{
+	    return readBank(lock, chan, cpScaleFactorMap, intLvl, ptr, n);
+	}
+
+	bool getScaleFactors(vwpp::Lock const& lock, uint16_t const chan,
+			     uint16_t const intLvl, uint16_t* const ptr,
+			     uint16_t const n)
+	{
+	    return readBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
+	}
+
+	bool setDelays(vwpp::Lock const& lock, uint16_t const chan,
+		       uint16_t const intLvl, uint16_t const* const ptr,
+		       uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpDelays, intLvl, ptr, n);
+	}
+
+	bool setFrequencies(vwpp::Lock const& lock, uint16_t const chan,
+			    uint16_t const intLvl, uint16_t const* const ptr,
+			    uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpFrequencies, intLvl, ptr, n);
+	}
+
+	bool setFrequencyMap(vwpp::Lock const& lock, uint16_t const chan,
+			     uint16_t const intLvl, uint16_t const* const ptr,
+			     uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpFrequencyMap, intLvl, ptr, n);
+	}
+
+	bool setOffsetMap(vwpp::Lock const& lock, uint16_t const chan,
+			  uint16_t const intLvl, uint16_t const* const ptr,
+			  uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpOffsetMap, intLvl, ptr, n);
+	}
+
+	bool setOffsets(vwpp::Lock const& lock, uint16_t const chan,
+			uint16_t const intLvl, uint16_t const* const ptr,
+			uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpOffsets, intLvl, ptr, n);
+	}
+
+	bool setPhaseMap(vwpp::Lock const& lock, uint16_t const chan,
+			 uint16_t const intLvl, uint16_t const* const ptr,
+			 uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpPhaseMap, intLvl, ptr, n);
+	}
+
+	bool setPhases(vwpp::Lock const& lock, uint16_t const chan,
+		       uint16_t const intLvl, uint16_t const* const ptr,
+		       uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpPhases, intLvl, ptr, n);
+	}
+
+	bool setRamp(vwpp::Lock const& lock, uint16_t const chan,
+		     uint16_t const ramp, uint16_t const* const ptr,
+		     uint16_t const n)
+	{
+	    return writeBank(lock, chan,
+			     (ChannelProperty)((ramp << 7) + 0x1000 * chan),
+			     0, ptr, n);
+	}
+
+	bool setRampMap(vwpp::Lock const& lock, uint16_t const chan,
+			uint16_t const intLvl, uint16_t const* const ptr,
+			uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpRampMap, intLvl, ptr, n);
+	}
+
+	bool setScaleFactorMap(vwpp::Lock const& lock, uint16_t const chan,
+			       uint16_t const intLvl, uint16_t const* const ptr,
+			       uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpScaleFactorMap, intLvl, ptr, n);
+	}
+
+	bool setScaleFactors(vwpp::Lock const& lock, uint16_t const chan,
+			     uint16_t const intLvl, uint16_t const* const ptr,
+			     uint16_t const n)
+	{
+	    return writeBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
+	}
+
+	bool sineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
+			  SineMode const mode)
+	{
+	    uint16_t const tmp = static_cast<uint16_t>(mode);
+
+	    return writeBank(lock, chan, cpSineWaveMode, 0, &tmp, 1);
+	}
+
+	bool waveformEnable(vwpp::Lock const& lock, uint16_t const chan,
+			    bool const en)
+	{
+	    uint16_t const tmp = static_cast<uint16_t>(en);
+
+	    return writeBank(lock, chan, cpWaveformEnable, 0, &tmp, 1);
+	}
+
+	bool tclkTrigEnable(vwpp::Lock const&, bool);
+	bool setTriggerMap(vwpp::Lock const&, uint16_t,
+			   uint8_t const[8], size_t);
     };
 
     typedef Card* HANDLE;
 };
 
 extern "C" {
-    V473::HANDLE v473_create(uint8_t, uint8_t);
+    V473::HANDLE v473_create(int, int);
     STATUS v473_destroy(V473::HANDLE);
+    STATUS v473_setupInterrupt(int, int, int, int, int, int, int, int, int);
+    STATUS v473_test(V473::HANDLE);
 };
 
 // Local Variables:

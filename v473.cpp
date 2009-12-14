@@ -2,8 +2,8 @@
 
 #include "v473.h"
 #include <errlogLib-2.0.h>
-#include <stdexcept>
 #include <cstdio>
+#include <cassert>
 #include <vme.h>
 #include <sysLib.h>
 #include <iv.h>
@@ -32,7 +32,8 @@ static void term()
 
 using namespace V473;
 
-Card::Card(uint8_t addr, uint8_t intVec)
+Card::Card(uint8_t addr, uint8_t intVec) :
+    vecNum(intVec)
 {
     char* baseAddr;
 
@@ -76,13 +77,17 @@ Card::Card(uint8_t addr, uint8_t intVec)
 			 reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
 			 reinterpret_cast<int>(this)))
 	throw std::runtime_error("cannot connect V473 hardware to interrupt vector");
+
     sysOut16(irqMask, 0xd21f);
     sysOut16(irqStatus, intVec);
 }
 
 Card::~Card()
 {
-    // XXX: Shut down interrupts and shut off the hardware.
+    generateInterrupts(false);
+    intDisconnect(INUM_TO_IVEC((int) vecNum),
+		  reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
+		  reinterpret_cast<int>(this));
 }
 
 void Card::gblIntHandler(Card* const ptr)
@@ -128,7 +133,7 @@ void Card::generateInterrupts(bool flg)
 // with the appropriate data. Returns true if everything is
 // successful.
 
-bool Card::readProperty(vwpp::Lock const&, uint16_t mb, size_t n)
+bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 {
     sysOut16(mailbox, mb);
     sysOut16(count, (uint16_t) n);
@@ -143,7 +148,7 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t mb, size_t n)
 // hardware. When this function returns, the data buffer will hold the
 // return value.
 
-bool Card::setProperty(vwpp::Lock const&, uint16_t mb, size_t n)
+bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 {
     sysOut16(mailbox, mb);
     sysOut16(count, (uint16_t) n);
@@ -152,4 +157,178 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t mb, size_t n)
     // Wait up to 20 milliseconds for a response.
 
     return intDone.wait(20);
+}
+
+bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
+		    ChannelProperty const prop, uint16_t const start,
+		    uint16_t* const ptr, uint16_t const n)
+{
+    if (start >= 32)
+	throw std::logic_error("interrupt level out of range");
+    if (start + n > 32)
+	throw std::logic_error("too many elements requested");
+
+    if (setProperty(lock, GEN_ADDR(chan, prop, start), n)) {
+	for (uint16_t ii = 0; ii < n; ++ii)
+	    ptr[ii] = sysIn16(dataBuffer + ii);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::writeBank(vwpp::Lock const& lock, uint16_t const chan,
+		     ChannelProperty const prop, uint16_t const start,
+		     uint16_t const* const ptr, uint16_t const n)
+{
+    if (start >= 32)
+	throw std::logic_error("interrupt level out of range");
+    if (start + n > 32)
+	throw std::logic_error("too many elements requested");
+
+    for (uint16_t ii = 0; ii < n; ++ii)
+	sysOut16(dataBuffer + ii, ptr[ii]);
+    return setProperty(lock, GEN_ADDR(chan, prop, start), n);
+}
+
+bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
+			 uint8_t const events[8], size_t const n)
+{
+    if (n <= 8) {
+	for (size_t ii = 0; ii < 8; ++ii) {
+	    sysOut16(dataBuffer, ii < n ? events[ii] : 0x00fe);
+	    if (!setProperty(lock, 0x4000 + (intLvl << 3) + ii, 1))
+		return false;
+	}
+	return true;
+    } else
+	throw std::logic_error("# of TCLK events cannot exceed 8");
+}
+
+bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
+{
+    sysOut16(dataBuffer, static_cast<uint16_t>(en));
+    return setProperty(lock, (ChannelProperty) 0x4200, 1);
+}
+
+V473::HANDLE v473_create(int addr, int intVec)
+{
+    try {
+	V473::HANDLE const ptr = new Card(addr, intVec);
+
+	ptr->generateInterrupts(true);
+	return ptr;
+    }
+    catch (std::exception const& e) {
+	printf("ERROR: %s\n", e.what());
+	return 0;
+    }
+}
+
+STATUS v473_destroy(V473::HANDLE ptr)
+{
+    delete ptr;
+    return OK;
+}
+
+STATUS v473_setupInterrupt(V473::HANDLE const ptr, uint8_t const chan,
+			   uint8_t const intLvl, uint8_t const ramp,
+			   uint8_t const scale, uint8_t const offset,
+			   uint8_t const delay, uint8_t const* const event,
+			   size_t const n)
+{
+    if (ptr) {
+	try {
+	    // Sanity checks.
+
+	    if (chan >= 4) {
+		printf("ERROR: channel must be less than 4.\n");
+		return ERROR;
+	    }
+
+	    if (intLvl >= 32) {
+		printf("ERROR: interrupt level must be less than 32.\n");
+		return ERROR;
+	    }
+
+	    if (ramp >= 16) {
+		printf("ERROR: ramp index must be less than 16.\n");
+		return ERROR;
+	    }
+
+	    if (scale >= 32) {
+		printf("ERROR: scale factor index must be less than 32.\n");
+		return ERROR;
+	    }
+
+	    if (offset >= 32) {
+		printf("ERROR: offset index must be less than 32.\n");
+		return ERROR;
+	    }
+
+	    if (delay >= 32) {
+		printf("ERROR: delay index must be less than 32.\n");
+		return ERROR;
+	    }
+
+	    if (event && n > 8) {
+		printf("ERROR: Can only set up to 8 clock events per interrupt.\n");
+		return ERROR;
+	    }
+
+	    return OK;
+	}
+	catch (std::exception const& e) {
+	    printf("ERROR: %s\n", e.what());
+	}
+    }
+    return ERROR;
+}
+
+#include <cmath>
+
+STATUS v473_test(V473::HANDLE hw)
+{
+    try {
+	vwpp::Lock lock(hw->mutex);
+
+	hw->waveformEnable(lock, 0, false);
+
+	// Generate sine wave table.
+
+	uint16_t data[128];
+
+	for (unsigned ii = 0; ii < 63; ++ii) {
+	    data[ii * 2] = (int16_t) (0x4000 * sin(ii * 6.2830 / 63));
+	    data[ii * 2 + 1] = (uint16_t) 105;
+	}
+	data[126] = 0;
+	data[127] = 0;
+	hw->setRamp(lock, 0, 0, data, 128);
+
+	// Set the scale factor to 1.0.
+
+	data[0] = 128;
+	hw->setScaleFactors(lock, 0, 1, data, 1);
+	data[0] = 1;
+	hw->setScaleFactorMap(lock, 0, 0, data, 1);
+
+	// Set the offset
+
+	data[0] = 0;
+	hw->setOffsetMap(lock, 0, 0, data, 1);
+
+	// Trigger interrupt level 0 on $0f events.
+
+	uint8_t event = 0x0f;
+
+	hw->setTriggerMap(lock, 0, &event, 1);
+	hw->tclkTrigEnable(lock, true);
+	hw->waveformEnable(lock, 0, true);
+    }
+    catch (std::exception const& e) {
+	printf("caught: %s\n", e.what());
+	return ERROR;
+    }
+
+    return OK;
 }
