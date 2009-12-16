@@ -101,6 +101,8 @@ namespace V473 {
 	void reset() { *resetAddr = 0; }
 	void generateInterrupts(bool);
 
+	uint16_t getActiveInterruptLevel(vwpp::Lock const&);
+
 	bool getDelays(vwpp::Lock const& lock, uint16_t const chan,
 		       uint16_t const intLvl, uint16_t* const ptr,
 		       uint16_t const n)

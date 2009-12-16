@@ -4,6 +4,7 @@
 #include <errlogLib-2.0.h>
 #include <cstdio>
 #include <cassert>
+#include <algorithm>
 #include <vme.h>
 #include <sysLib.h>
 #include <iv.h>
@@ -59,16 +60,29 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     // are, indeed, a V473.
 
     sysOut16(mailbox, 0xff00);
-    sysOut16(count, 3);
+    sysOut16(count, 1);
     sysOut16(readWrite, 0);
     taskDelay(2);
 
-    if (sysIn16(readWrite) != 2 || sysIn16(count) != 3 || sysIn16(dataBuffer) != 473)
+    if (sysIn16(readWrite) != 2 || sysIn16(count) != 1 || sysIn16(dataBuffer) != 473)
 	throw std::runtime_error("VME A16 address doesn't refer to V473 hardware");
 
+    sysOut16(mailbox, 0xff01);
+    sysOut16(count, 1);
+    sysOut16(readWrite, 0);
+    taskDelay(2);
+
+    uint16_t const firmware = sysIn16(dataBuffer);
+
+    sysOut16(mailbox, 0xff02);
+    sysOut16(count, 1);
+    sysOut16(readWrite, 0);
+    taskDelay(2);
+
+    uint16_t const fpga = sysIn16(dataBuffer);
+
     logInform5(hLog, "V473: Found hardware -- addr %p, Firmware v%d.%d, FPGA v%d.%d",
-	       dataBuffer, sysIn16(dataBuffer + 1) >> 4, sysIn16(dataBuffer + 1) & 0xf,
-	       sysIn16(dataBuffer + 2) >> 4, sysIn16(dataBuffer + 2) & 0xf);
+	       dataBuffer, firmware >> 4, firmware & 0xf, fpga >> 4, fpga & 0xf);
 
     // Now that we know we're a V473, we can attach the interrupt
     // handler.
@@ -93,6 +107,13 @@ Card::~Card()
 void Card::gblIntHandler(Card* const ptr)
 {
     ptr->intHandler();
+}
+
+uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
+{
+    if (readProperty(lock, 0x4210, 1))
+	return sysIn16(dataBuffer);
+    throw std::runtime_error("cannot read active interrupt level");
 }
 
 void Card::intHandler()
@@ -324,6 +345,209 @@ STATUS v473_test(V473::HANDLE hw)
 	hw->setTriggerMap(lock, 0, &event, 1);
 	hw->tclkTrigEnable(lock, true);
 	hw->waveformEnable(lock, 0, true);
+    }
+    catch (std::exception const& e) {
+	printf("caught: %s\n", e.what());
+	return ERROR;
+    }
+
+    return OK;
+}
+
+#define M_PI 3.14159265358979323846
+
+typedef float POINT[4];
+typedef float const CPOINT[4];
+typedef float MATRIX[4][4];
+typedef float const CMATRIX[4][4];
+
+static void project(CMATRIX m, CPOINT p, float b[2])
+{
+    POINT tmp = { 0.0 };
+
+    for (size_t row = 0; row < 4; ++row)
+	for (size_t col = 0; col < 4; ++col)
+	    tmp[row] = m[row][col] * p[col];
+    b[0] = std::min(tmp[0] * 5 / (std::max(tmp[2], 0.f) + 5), 1.f);
+    b[1] = std::min(tmp[1] * 5 / (std::max(tmp[2], 0.f) + 5), 1.f);
+}
+
+static void product(CMATRIX p, MATRIX m)
+{
+    MATRIX tmp = { { 0.0 } };
+
+    for (size_t row = 0; row < 4; ++row)
+	for (size_t col = 0; col < 4; ++col)
+	    for (size_t ii = 0; ii < 4; ++ii)
+		for (size_t jj = 0; jj < 4; ++jj)
+		    tmp[row][col] += m[ii][jj] * p[jj][ii];
+    m = tmp;
+}
+
+static void identity(MATRIX m)
+{
+    m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0;
+    m[0][1] = m[0][2] = m[0][3] = m[1][0] = m[1][2] = m[1][3] = m[2][0] =
+	m[2][1] = m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.0;
+}
+
+static void translate(MATRIX m, float const dx, float const dy,
+		      float const dz)
+{
+    m[3][0] += dx;
+    m[3][1] += dy;
+    m[3][2] += dz;
+}
+
+static void rotate(MATRIX m, float const rx, float const ry, float const rz)
+{
+    float const rrx = (2.0 * M_PI / 360.0) * rx;
+    float const rry = (2.0 * M_PI / 360.0) * ry;
+    float const rrz = (2.0 * M_PI / 360.0) * rz;
+
+    float const sx = sin(rrx);
+    float const cx = cos(rrx);
+    float const sy = sin(rry);
+    float const cy = cos(rry);
+    float const sz = sin(rrz);
+    float const cz = cos(rrz);
+
+    CMATRIX mx = {
+	{1., 0., 0., 0.},
+	{0., cx, sx, 0.},
+	{0., -sx, cx, 0.},
+	{0., 0., 0., 1.}
+    };
+
+    product(mx, m);
+
+    CMATRIX my = {
+	{cy, 0., -sy, 0.},
+	{0., 1., 0., 0.},
+	{sy, 0., cy, 0.},
+	{0., 0., 0., 1.}
+    };
+
+    product(my, m);
+
+    CMATRIX mz = {
+	{cz, -sz, 0., 0.},
+	{sz, cz, 0., 0.},
+	{0., 0., 0., 0.},
+	{0., 0., 0., 1.}
+    };
+
+    product(mz, m);
+}
+
+STATUS v473_cube(V473::HANDLE hw)
+{
+    int xa = 0;
+    int ramp = 0;
+
+    try {
+	{
+	    // Setup the hardware
+
+	    uint16_t data;
+	    vwpp::Lock lock(hw->mutex);
+
+	    hw->waveformEnable(lock, 0, false);
+	    hw->waveformEnable(lock, 1, false);
+
+	    data = 1;
+	    hw->setRampMap(lock, 0, 0, &data, 1);
+	    hw->setRampMap(lock, 1, 0, &data, 1);
+	    data = 2;
+	    hw->setRampMap(lock, 0, 1, &data, 2);
+	    hw->setRampMap(lock, 1, 1, &data, 2);
+
+	    // Set the scale factor to 1.0.
+
+	    data = 128;
+	    hw->setScaleFactors(lock, 0, 1, &data, 1);
+	    hw->setScaleFactors(lock, 1, 1, &data, 1);
+	    data = 1;
+	    hw->setScaleFactorMap(lock, 0, 0, &data, 1);
+	    hw->setScaleFactorMap(lock, 1, 0, &data, 1);
+
+	    // Set the offset
+
+	    data = 0;
+	    hw->setOffsetMap(lock, 0, 0, &data, 1);
+	    hw->setOffsetMap(lock, 1, 0, &data, 1);
+
+	    hw->tclkTrigEnable(lock, true);
+
+	    // Enable channels 0 and 1.
+
+	    hw->waveformEnable(lock, 0, true);
+	    hw->waveformEnable(lock, 1, true);
+	}
+
+	while (true) {
+	    static size_t const path[] = {
+		1, 2, 3, 4, 8, 7, 6, 5, 1, 4, 3, 7, 8, 5, 6, 2, 1
+	    };
+
+	    // Update rotation
+
+	    if ((xa += 12) >= 360)
+		xa %= 360;
+
+	    // Compute transform matrix
+
+	    MATRIX m;
+
+	    identity(m);
+	    rotate(m, (float) xa, 0, 0);
+	    translate(m, 0., 0., 1.);
+
+	    // Translate each point and save result into ramp table
+	    // buffer.
+
+	    uint16_t data[2][2 * sizeof(path) / sizeof(*path)];
+
+	    for (size_t ii = 0; ii < sizeof(path) / sizeof(*path); ++ii) {
+		static POINT const point[] = {
+		    { -0.5,  0.5, -0.5, 1. },
+		    { -0.5,  0.5,  0.5, 1. },
+		    {  0.5,  0.5,  0.5, 1. },
+		    {  0.5,  0.5, -0.5, 1. },
+		    { -0.5, -0.5, -0.5, 1. },
+		    { -0.5, -0.5,  0.5, 1. },
+		    {  0.5, -0.5,  0.5, 1. },
+		    {  0.5, -0.5, -0.5, 1. }
+		};
+		float b[2];
+
+		project(m, point[path[ii]], b);
+		data[0][ii * 2] = uint16_t(b[0] * 32000);
+		data[1][ii * 2] = uint16_t(b[1] * 32000);
+		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 800;
+	    }
+
+	    {
+		vwpp::Lock lock(hw->mutex);
+
+		hw->setRamp(lock, 0, ramp + 1, data[0], 128);
+		hw->setRamp(lock, 1, ramp + 1, data[1], 128);
+
+		// Hand the $0f event to the interrupt assigned to the
+		// next ramp.
+
+		uint8_t const event = 0x0f;
+
+		hw->setTriggerMap(lock, ramp, &event, 1);
+
+		// Wait for the ramp to start to play. Then we can
+		// switch to updating the other ramp.
+
+		while (hw->getActiveInterruptLevel(lock) == ramp)
+		    taskDelay(1);
+		ramp = !ramp;
+	    }
+	}
     }
     catch (std::exception const& e) {
 	printf("caught: %s\n", e.what());
