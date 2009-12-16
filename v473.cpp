@@ -186,8 +186,6 @@ bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
 {
     if (start >= 32)
 	throw std::logic_error("interrupt level out of range");
-    if (start + n > 32)
-	throw std::logic_error("too many elements requested");
 
     if (setProperty(lock, GEN_ADDR(chan, prop, start), n)) {
 	for (uint16_t ii = 0; ii < n; ++ii)
@@ -203,8 +201,6 @@ bool Card::writeBank(vwpp::Lock const& lock, uint16_t const chan,
 {
     if (start >= 32)
 	throw std::logic_error("interrupt level out of range");
-    if (start + n > 32)
-	throw std::logic_error("too many elements requested");
 
     for (uint16_t ii = 0; ii < n; ++ii)
 	sysOut16(dataBuffer + ii, ptr[ii]);
