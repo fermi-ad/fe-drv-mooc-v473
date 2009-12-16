@@ -550,8 +550,8 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		// Wait for the ramp to start to play. Then we can
 		// switch to updating the other ramp.
 
-		while (hw->getActiveInterruptLevel(lock) == ramp)
-		    taskDelay(1);
+		// while (hw->getActiveInterruptLevel(lock) == ramp)
+		taskDelay(4);
 		ramp = !ramp;
 	    }
 	}
