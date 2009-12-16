@@ -318,13 +318,13 @@ STATUS v473_test(V473::HANDLE hw)
 
 	uint16_t data[128];
 
-	for (unsigned ii = 0; ii < 63; ++ii) {
-	    data[ii * 2] = (int16_t) (0x4000 * sin(ii * 6.2830 / 63));
+	for (unsigned ii = 0; ii < 62; ++ii) {
+	    data[ii * 2] = (int16_t) (0x4000 * sin(ii * 6.2830 / 62));
 	    data[ii * 2 + 1] = (uint16_t) 105;
 	}
-	data[126] = 0;
-	data[127] = 0;
-	hw->setRamp(lock, 0, 0, data, 128);
+	data[124] = 0;
+	data[125] = 0;
+	hw->setRamp(lock, 0, 0, data, 126);
 
 	// Set the scale factor to 1.0.
 
