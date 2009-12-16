@@ -7,7 +7,7 @@ SUPPORTED_VERSIONS = 64
 
 MOD_TARGETS = v473.out
 
-include ${PRODUCTS_INCDIR}frontend-2.1.mk
+include ${PRODUCTS_INCDIR}frontend-2.3.mk
 
 v473.o : v473.h
 
