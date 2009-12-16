@@ -303,7 +303,7 @@ STATUS v473_setupInterrupt(V473::HANDLE const ptr, uint8_t const chan,
 
 #include <cmath>
 
-STATUS v473_test(V473::HANDLE hw)
+extern "C" STATUS v473_test(V473::HANDLE hw)
 {
     try {
 	vwpp::Lock lock(hw->mutex);
@@ -436,7 +436,7 @@ static void rotate(MATRIX m, float const rx, float const ry, float const rz)
     product(mz, m);
 }
 
-STATUS v473_cube(V473::HANDLE hw)
+extern "C" STATUS v473_cube(V473::HANDLE hw)
 {
     int xa = 0;
     int ramp = 0;
