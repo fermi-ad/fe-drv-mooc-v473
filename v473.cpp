@@ -308,7 +308,11 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
     try {
 	vwpp::Lock lock(hw->mutex);
 
+	logInform0(hLog, "hardware is locked");
+
 	hw->waveformEnable(lock, 0, false);
+
+	logInform0(hLog, "channel 0 is disabled");
 
 	// Generate sine wave table.
 
@@ -320,7 +324,14 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 	}
 	data[124] = 0;
 	data[125] = 0;
-	hw->setRamp(lock, 0, 0, data, 126);
+	hw->setRamp(lock, 0, 1, data, 126);
+
+	logInform0(hLog, "ramp table 1 loaded");
+
+	data[0] = 1;
+	hw->setRampMap(lock, 0, 0, data, 1);
+
+	logInform0(hLog, "int level 0 points to ramp 1\");
 
 	// Set the scale factor to 1.0.
 
