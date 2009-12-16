@@ -331,7 +331,7 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 	data[0] = 1;
 	hw->setRampMap(lock, 0, 0, data, 1);
 
-	logInform0(hLog, "int level 0 points to ramp 1\");
+	logInform0(hLog, "int level 0 points to ramp 1");
 
 	// Set the scale factor to 1.0.
 
