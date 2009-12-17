@@ -94,9 +94,9 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 	throw std::runtime_error("cannot connect V473 hardware to interrupt vector");
 
     sysIntEnable(1);
-    sysOut16(irqMask, 0xd21f);
     sysOut16(irqStatus, intVec);
     sysOut16(irqSource, 0xffff);
+    sysOut16(irqMask, 0xd21f);
 }
 
 Card::~Card()
