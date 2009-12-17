@@ -169,7 +169,8 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     unsigned long const start = ppcTick();
     bool const result = intDone.wait(40);
 
-    logInform1(hLog, "readProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
+    logInform2(hLog, "readProperty(): took %ld uS ... status is 0x%04x",
+	       ticks_to_uS(ppcTick() - start), sysIn16(irqSource));
     return result;
 }
 
@@ -188,7 +189,8 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     unsigned long const start = ppcTick();
     bool const result = intDone.wait(40);
 
-    logInform1(hLog, "setProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
+    logInform2(hLog, "setProperty(): took %ld uS ... status is 0x%04x",
+	       ticks_to_uS(ppcTick() - start), sysIn16(irqSource));
     return result;
 }
 
