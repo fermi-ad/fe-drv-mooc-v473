@@ -11,7 +11,7 @@ namespace V473 {
 
 	vwpp::Event intDone;
 
-	uint16_t *dataBuffer;
+	uint16_t* dataBuffer;
 	uint16_t* mailbox;
 	uint16_t* count;
 	uint16_t* readWrite;
@@ -27,6 +27,8 @@ namespace V473 {
 	Card();
 	Card(Card const&);
 	Card& operator=(Card const&);
+
+	static uint16_t* xlatAddr(uint8_t, uint32_t);
 
 	enum ChannelProperty {
 	    cpRampTable, cpRampMap = 0x800, cpScaleFactorMap = 0x840,
