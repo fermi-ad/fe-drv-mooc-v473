@@ -366,7 +366,8 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 
 	logInform0(hLog, "hardware is locked");
 
-	hw->waveformEnable(lock, 0, false);
+	if (!hw->waveformEnable(lock, 0, false))
+	    throw std::runtime_error("error disabling waveform");
 
 	logInform0(hLog, "channel 0 is disabled");
 
@@ -380,39 +381,47 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 	}
 	data[124] = 0;
 	data[125] = 0;
-	hw->setRamp(lock, 0, 1, data, 126);
+	if (!hw->setRamp(lock, 0, 1, data, 126))
+	    throw std::runtime_error("error setting ramp");
 
 	logInform0(hLog, "ramp table 1 loaded");
 
 	data[0] = 1;
-	hw->setRampMap(lock, 0, 0, data, 1);
+	if (!hw->setRampMap(lock, 0, 0, data, 1))
+	    throw std::runtime_error("error setting ramp map");
 
 	logInform0(hLog, "int level 0 points to ramp 1");
 
 	// Set the scale factor to 1.0.
 
 	data[0] = 128;
-	hw->setScaleFactors(lock, 0, 1, data, 1);
+	if (!hw->setScaleFactors(lock, 0, 1, data, 1))
+	    throw std::runtime_error("error setting scale factor");
 	logInform0(hLog, "set scale factor #1 to 1.0");
 	data[0] = 1;
-	hw->setScaleFactorMap(lock, 0, 0, data, 1);
+	if (!hw->setScaleFactorMap(lock, 0, 0, data, 1))
+	    throw std::runtime_error("error setting scale factor map");
 	logInform0(hLog, "pointed channel 0, interrupt level 0 to scale factor");
 
 	// Set the offset
 
 	data[0] = 0;
-	hw->setOffsetMap(lock, 0, 0, data, 1);
+	if (!hw->setOffsetMap(lock, 0, 0, data, 1))
+	    throw std::runtime_error("error setting offset map");
 	logInform0(hLog, "point to null offset");
 
 	// Trigger interrupt level 0 on $0f events.
 
 	uint8_t event = 0x0f;
 
-	hw->setTriggerMap(lock, 0, &event, 1);
+	if (!hw->setTriggerMap(lock, 0, &event, 1))
+	    throw std::runtime_error("error setting trigger map");
 	logInform0(hLog, "Set $0F event to trigger int lvl 0");
-	hw->tclkTrigEnable(lock, true);
+	if (!hw->tclkTrigEnable(lock, true))
+	    throw std::runtime_error("error enabling triggers");
 	logInform0(hLog, "enable triggering from TCLKs");
-	hw->waveformEnable(lock, 0, true);
+	if (!hw->waveformEnable(lock, 0, true))
+	    throw std::runtime_error("error enabling waveform");
 	logInform0(hLog, "enable channel 0");
     }
     catch (std::exception const& e) {
