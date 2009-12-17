@@ -164,7 +164,7 @@ void Card::intHandler()
     uint16_t const sts = sysIn16(irqSource);
 
     logInform1(hLog, "interrupt fired -- status 0x%04x", sts);
-    sysOut16(irqSource, sts);
+    sysOut16(irqSource, 0xffff);
 
     if (sts & 0x8000)
 	handleCommandErr();
