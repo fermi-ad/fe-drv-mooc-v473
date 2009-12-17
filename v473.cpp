@@ -188,12 +188,8 @@ void Card::intHandler()
 
     sysOut16(irqSource, sts);
 
-    unsigned long const start = ppcTick();
-
     while (uint16_t const diff = sts & sysIn16(irqSource))
 	sysOut16(irqSource, diff);
-
-    logInform1(hLog, "took %ld uS to clear status", ticks_to_uS(ppcTick() - start));
 }
 
 void Card::generateInterrupts(bool flg)
