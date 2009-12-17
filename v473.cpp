@@ -188,7 +188,7 @@ void Card::intHandler()
 
     sysOut16(irqSource, sts);
 
-    while (uint16_t const diff = sts & sysIn16(irqSource))
+    while (uint16_t const diff = (sts & sysIn16(irqSource)) & ~0x1000)
 	sysOut16(irqSource, diff);
 }
 
