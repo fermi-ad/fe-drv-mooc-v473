@@ -108,6 +108,7 @@ Card::~Card()
 
 void Card::gblIntHandler(Card* const ptr)
 {
+    logInform0(hLog, "interrupt fired!");
     ptr->intHandler();
 }
 
