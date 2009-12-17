@@ -93,7 +93,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 			 reinterpret_cast<int>(this)))
 	throw std::runtime_error("cannot connect V473 hardware to interrupt vector");
 
-    intEnable((int) intVec);
+    intEnable(1);
     sysOut16(irqMask, 0xd21f);
     sysOut16(irqStatus, intVec);
 }
@@ -101,7 +101,6 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 Card::~Card()
 {
     generateInterrupts(false);
-    intDisable((int) vecNum);
     intDisconnect(INUM_TO_IVEC((int) vecNum),
 		  reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
 		  reinterpret_cast<int>(this));
