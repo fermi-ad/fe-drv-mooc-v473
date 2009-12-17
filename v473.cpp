@@ -337,21 +337,27 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 
 	data[0] = 128;
 	hw->setScaleFactors(lock, 0, 1, data, 1);
+	logInform0(hLog, "set scale factor #1 to 1.0");
 	data[0] = 1;
 	hw->setScaleFactorMap(lock, 0, 0, data, 1);
+	logInform0(hLog, "pointed channel 0, interrupt level 0 to scale factor");
 
 	// Set the offset
 
 	data[0] = 0;
 	hw->setOffsetMap(lock, 0, 0, data, 1);
+	logInform0(hLog, "point to null offset");
 
 	// Trigger interrupt level 0 on $0f events.
 
 	uint8_t event = 0x0f;
 
 	hw->setTriggerMap(lock, 0, &event, 1);
+	logInform0(hLog, "Set $0F event to trigger int lvl 0");
 	hw->tclkTrigEnable(lock, true);
+	logInform0(hLog, "enable triggering from TCLKs");
 	hw->waveformEnable(lock, 0, true);
+	logInform0(hLog, "enable channel 0");
     }
     catch (std::exception const& e) {
 	printf("caught: %s\n", e.what());
