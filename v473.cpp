@@ -10,6 +10,7 @@
 #include <iv.h>
 #include <intLib.h>
 #include <taskLib.h>
+#include <ppcLib-1.2.h>
 
 extern "C" UINT16 sysIn16(UINT16*);
 extern "C" void sysOut16(UINT16*, UINT16);
@@ -162,7 +163,11 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 20 milliseconds for a response.
 
-    return intDone.wait(20);
+    unsigned long const start = ppcTick();
+    bool const result = intDone.wait(20);
+
+    logInform1(hLog, "readProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
+    return result;
 }
 
 // Sends the mailbox value, the word count and the SET command to the
@@ -177,7 +182,11 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 20 milliseconds for a response.
 
-    return intDone.wait(20);
+    unsigned long const start = ppcTick();
+    bool const result = intDone.wait(20);
+
+    logInform1(hLog, "setProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
+    return result;
 }
 
 bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
