@@ -124,6 +124,7 @@ void Card::intHandler()
     uint16_t const sts = sysIn16(irqSource);
 
     logInform1(hLog, "interrupt fired -- status 0x%04x", sts);
+    sysOut16(irqSource, sts);
 
     if (sts & 0x8000)
 	handleCommandErr();
@@ -143,15 +144,11 @@ void Card::intHandler()
 	handlePS1Err();
     if (sts & 0x1)
 	handlePS0Err();
-
-    // Clear the status bits.
-
-    sysOut16(irqSource, sts);
 }
 
 void Card::generateInterrupts(bool flg)
 {
-    sysOut16(irqEnable, flg ? 3 : 0);
+    sysOut16(irqEnable, flg ? 1 : 0);
 }
 
 // Sends the mailbox value, the word count and the READ command to the
@@ -170,8 +167,7 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     unsigned long const start = ppcTick();
     bool const result = intDone.wait(40);
 
-    logInform2(hLog, "readProperty(): took %ld uS ... status is 0x%04x",
-	       ticks_to_uS(ppcTick() - start), sysIn16(irqSource));
+    logInform1(hLog, "readProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
     return result;
 }
 
@@ -190,8 +186,7 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     unsigned long const start = ppcTick();
     bool const result = intDone.wait(40);
 
-    logInform2(hLog, "setProperty(): took %ld uS ... status is 0x%04x",
-	       ticks_to_uS(ppcTick() - start), sysIn16(irqSource));
+    logInform1(hLog, "setProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
     return result;
 }
 
