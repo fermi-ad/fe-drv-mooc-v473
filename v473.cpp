@@ -188,8 +188,10 @@ void Card::intHandler()
 
     sysOut16(irqSource, sts);
 
-    if (uint16_t const diff = sts & sysIn16(irqSource))
+    if (uint16_t const diff = sts & sysIn16(irqSource)) {
 	logInform1(hLog, "leaving int handler -- bits still set: 0x%04x", diff);
+	sysOut16(irqSource, diff);
+    }
 }
 
 void Card::generateInterrupts(bool flg)
