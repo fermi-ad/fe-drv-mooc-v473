@@ -83,14 +83,14 @@ namespace V473 {
 	void intHandler();
 
      protected:
-	virtual void handleCommandErr() {}
-	virtual void handleCalculationErr() {}
-	virtual void handleMissingTCLK() {}
-	virtual void handlePSTrackingErr() {}
-	virtual void handlePS0Err() {}
-	virtual void handlePS1Err() {}
-	virtual void handlePS2Err() {}
-	virtual void handlePS3Err() {}
+	virtual void handleCommandErr();
+	virtual void handleCalculationErr();
+	virtual void handleMissingTCLK();
+	virtual void handlePSTrackingErr();
+	virtual void handlePS0Err();
+	virtual void handlePS1Err();
+	virtual void handlePS2Err();
+	virtual void handlePS3Err();
 
      public:
 	vwpp::Mutex mutex;
