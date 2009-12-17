@@ -112,6 +112,46 @@ void Card::gblIntHandler(Card* const ptr)
     ptr->intHandler();
 }
 
+void Card::handleCommandErr()
+{
+    logInform1(hLog, "(V473::Card*) %p detected a command error", this);
+}
+
+void Card::handleCalculationErr()
+{
+    logInform1(hLog, "(V473::Card*) %p detected a calculation error", this);
+}
+
+void Card::handleMissingTCLK()
+{
+    logInform1(hLog, "(V473::Card*) %p detected missing TCLK", this);
+}
+
+void Card::handlePSTrackingErr()
+{
+    logInform1(hLog, "(V473::Card*) %p detected a tracking error", this);
+}
+
+void Card::handlePS0Err()
+{
+    logInform1(hLog, "(V473::Card*) %p detected power supply 0 error", this);
+}
+
+void Card::handlePS1Err()
+{
+    logInform1(hLog, "(V473::Card*) %p detected power supply 1 error", this);
+}
+
+void Card::handlePS2Err()
+{
+    logInform1(hLog, "(V473::Card*) %p detected power supply 2 error", this);
+}
+
+void Card::handlePS3Err()
+{
+    logInform1(hLog, "(V473::Card*) %p detected power supply 3 error", this);
+}
+
 uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
 {
     if (readProperty(lock, 0x4210, 1))
