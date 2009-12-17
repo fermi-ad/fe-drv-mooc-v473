@@ -186,6 +186,9 @@ void Card::intHandler()
 	handlePS1Err();
     if (sts & 0x1)
 	handlePS0Err();
+
+    logInform1(hLog, "leaving int handler -- bits still set: 0x%04x",
+	       sts & sysIn16(irqSource));
 }
 
 void Card::generateInterrupts(bool flg)
