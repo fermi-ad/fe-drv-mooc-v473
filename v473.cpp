@@ -161,10 +161,12 @@ uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
 
 void Card::intHandler()
 {
+    sysOut16(irqSource, 0x1000);
+
     uint16_t const sts = sysIn16(irqSource);
 
     logInform1(hLog, "interrupt fired -- status 0x%04x", sts);
-    sysOut16(irqSource, 0xffff);
+    sysOut16(irqSource, sts);
 
     if (sts & 0x8000)
 	handleCommandErr();
