@@ -446,12 +446,17 @@ typedef float const CMATRIX[4][4];
 
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
-    POINT tmp = { 0.0 };
+    POINT tmp;
     float const eye = 1.5f;
 
-    for (size_t row = 0; row < 4; ++row)
+    for (size_t row = 0; row < 3; ++row)
 	for (size_t col = 0; col < 4; ++col)
-	    tmp[row] += m[row][col] * p[col];
+	    tmp[row] =
+		m[row][0] * p[0] +
+		m[row][1] * p[1] +
+		m[row][2] * p[2] +
+		m[row][3];
+
     b[0] = std::min(tmp[0] * eye / (std::max(tmp[2], 0.f) + eye), 1.f);
     b[1] = std::min(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 1.f);
 }
