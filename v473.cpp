@@ -457,8 +457,8 @@ static void project(CMATRIX m, CPOINT p, float b[2])
 		m[row][2] * p[2] +
 		m[row][3];
 
-    b[0] = std::min(tmp[0] * eye / (std::max(tmp[2], 0.f) + eye), 1.f);
-    b[1] = std::min(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 1.f);
+    b[0] = std::min(tmp[0] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
+    b[1] = std::min(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
 }
 
 static void dumpMatrix(CMATRIX m)
@@ -650,15 +650,15 @@ STATUS v473_cube(V473::HANDLE const hw)
 		float b[2];
 
 		project(m, point[path[ii]], b);
-		data[0][ii * 2] = uint16_t(b[0] * 32000.);
-		data[1][ii * 2] = uint16_t(b[1] * 32000.);
+		data[0][ii * 2] = uint16_t(b[0] * 16000.);
+		data[1][ii * 2] = uint16_t(b[1] * 16000.);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 300;
 
 		printf("%5d %5.3f %5.3f\n", data[0][ii * 2 + 1],
 		       b[0], b[1]);
 
-		data[0][(ii + 1) * 2] = uint16_t(b[0] * 32000.);
-		data[1][(ii + 1) * 2] = uint16_t(b[1] * 32000.);
+		data[0][(ii + 1) * 2] = uint16_t(b[0] * 16000.);
+		data[1][(ii + 1) * 2] = uint16_t(b[1] * 16000.);
 		data[0][(ii + 1) * 2 + 1] = data[1][(ii + 1) * 2 + 1] = 0;
 	    }
 
