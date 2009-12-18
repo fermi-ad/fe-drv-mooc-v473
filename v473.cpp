@@ -617,8 +617,10 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    dumpMatrix(m);
 	    rotateX(m, 0.);
 	    printf("rotated around X:\n");
+	    dumpMatrix(m);
 	    rotateY(m, (float) ya);
 	    printf("rotated around Y:\n");
+	    dumpMatrix(m);
 	    rotateZ(m, 0.);
 	    printf("rotated around Z:\n");
 	    dumpMatrix(m);
