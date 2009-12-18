@@ -464,8 +464,8 @@ static void project(CMATRIX m, CPOINT p, float b[2])
 		m[row][2] * p[2] +
 		m[row][3];
 
-    b[0] = clip(tmp[0] * _eye / (std::max(tmp[2], 0.f) + _eye), 2.f);
-    b[1] = clip(tmp[1] * _eye / (std::max(tmp[2], 0.f) + _eye), 2.f);
+    b[0] = clip(tmp[0] * _eye / (tmp[2] + _eye), 2.f);
+    b[1] = clip(tmp[1] * _eye / (tmp[2] + _eye), 2.f);
 }
 
 static void dumpMatrix(CMATRIX m)
