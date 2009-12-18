@@ -515,7 +515,6 @@ static void rotateX(MATRIX m, float const a)
     product(mx, m);
 }
 
-#if 0
 static void rotateY(MATRIX m, float const a)
 {
     float const r = (2.0 * M_PI / 360.0) * a;
@@ -547,7 +546,6 @@ static void rotateZ(MATRIX m, float const a)
 
     product(mz, m);
 }
-#endif
 
 STATUS v473_cube(V473::HANDLE const hw)
 {
@@ -617,8 +615,12 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    identity(m);
 	    printf("identity:\n");
 	    dumpMatrix(m);
-	    rotateX(m, (float) ya);
-	    printf("rotated:\n");
+	    rotateX(m, 0.);
+	    printf("rotated around X:\n");
+	    rotateY(m, (float) ya);
+	    printf("rotated around Y:\n");
+	    rotateZ(m, 0.);
+	    printf("rotated around Z:\n");
 	    dumpMatrix(m);
 	    translate(m, 0., 0., 1.);
 	    printf("translated:\n");
