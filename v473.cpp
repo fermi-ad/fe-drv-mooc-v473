@@ -537,8 +537,8 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 	    hw->setRampMap(lock, 0, 0, &data, 1);
 	    hw->setRampMap(lock, 1, 0, &data, 1);
 	    data = 2;
-	    hw->setRampMap(lock, 0, 1, &data, 2);
-	    hw->setRampMap(lock, 1, 1, &data, 2);
+	    hw->setRampMap(lock, 0, 1, &data, 1);
+	    hw->setRampMap(lock, 1, 1, &data, 1);
 
 	    // Set the scale factor to 1.0.
 
