@@ -596,7 +596,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    // Translate each point and save result into ramp table
 	    // buffer.
 
-	    uint16_t data[2][2 * sizeof(path) / sizeof(*path)];
+	    uint16_t data[2][2 * (sizeof(path) / sizeof(*path) + 1)];
 
 	    printf("   dt     x     y\n"
 		   "----- ----- -----\n");
