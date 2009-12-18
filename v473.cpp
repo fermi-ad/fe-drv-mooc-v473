@@ -589,6 +589,9 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 
 	    uint16_t data[2][2 * sizeof(path) / sizeof(*path)];
 
+	    printf("   dt     x     y\n"
+		   "----- ----- -----\n");
+
 	    for (size_t ii = 0; ii < sizeof(path) / sizeof(*path); ++ii) {
 		static POINT const point[] = {
 		    { -0.5,  0.5, -0.5, 1. },
@@ -606,6 +609,9 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		data[0][ii * 2] = uint16_t(b[0] * 32000);
 		data[1][ii * 2] = uint16_t(b[1] * 32000);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 800;
+
+		printf("%5d %5d %5d\n", data[0][ii * 2 + 1],
+		       data[0][ii * 2], data[1][ii * 2]);
 	    }
 
 	    {
