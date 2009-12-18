@@ -444,6 +444,11 @@ typedef float const CPOINT[4];
 typedef float MATRIX[4][4];
 typedef float const CMATRIX[4][4];
 
+static float clip(float val, float limit)
+{
+    return std::min(std::max(val, -limit), limit);
+}
+
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
     POINT tmp;
@@ -457,8 +462,8 @@ static void project(CMATRIX m, CPOINT p, float b[2])
 		m[row][2] * p[2] +
 		m[row][3];
 
-    b[0] = std::min(tmp[0] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
-    b[1] = std::min(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
+    b[0] = clip(tmp[0] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
+    b[1] = clip(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
 }
 
 static void dumpMatrix(CMATRIX m)
@@ -624,7 +629,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    rotateZ(m, 0.);
 	    printf("rotated around Z:\n");
 	    dumpMatrix(m);
-	    translate(m, 0., 0., 1.);
+	    translate(m, 0., 0., 2.);
 	    printf("translated:\n");
 	    dumpMatrix(m);
 
