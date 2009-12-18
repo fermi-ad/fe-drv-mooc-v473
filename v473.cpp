@@ -556,7 +556,7 @@ void rotateZ(MATRIX m, float const a)
 
 STATUS v473_cube(V473::HANDLE const hw)
 {
-    int ya = 20;
+    int ya = 0;
     int ramp = 0;
 
     try {
@@ -613,7 +613,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 
 	    // Update rotation
 
-	    ya = (ya + 12) % 360;
+	    ya = (ya + 4) % 360;
 
 	    // Compute transform matrix
 
