@@ -563,7 +563,7 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 	    hw->waveformEnable(lock, 1, true);
 	}
 
-	while (true) {
+	do {
 	    static size_t const path[] = {
 		1, 2, 3, 4, 8, 7, 6, 5, 1, 4, 3, 7, 8, 5, 6, 2, 1
 	    };
@@ -625,7 +625,7 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		taskDelay(4);
 		ramp = !ramp;
 	    }
-	}
+	} while (false);
     }
     catch (std::exception const& e) {
 	printf("caught: %s\n", e.what());
