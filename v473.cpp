@@ -165,8 +165,6 @@ void Card::intHandler()
 
     uint16_t const sts = sysIn16(irqSource);
 
-    logInform1(hLog, "interrupt fired -- status 0x%04x", sts);
-
     if (sts & 0x8000)
 	handleCommandErr();
     if (sts & 0x4000)
@@ -188,8 +186,10 @@ void Card::intHandler()
 
     sysOut16(irqSource, sts);
 
+#if 0
     while (uint16_t const diff = (sts & sysIn16(irqSource)) & ~0x1000)
 	sysOut16(irqSource, diff);
+#endif
 }
 
 void Card::generateInterrupts(bool flg)
