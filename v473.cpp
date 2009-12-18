@@ -620,7 +620,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    MATRIX m;
 
 	    identity(m);
-	    rotateX(m, ya * 2.);
+	    rotateX(m, ya * 2.3);
 	    rotateY(m, (float) ya);
 	    //rotateZ(m, 0.);
 	    translate(m, 0., 0., 2.);
