@@ -456,6 +456,13 @@ static void project(CMATRIX m, CPOINT p, float b[2])
     b[1] = std::min(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 1.f);
 }
 
+static void dumpMatrix(CMATRIX m)
+{
+    for (size_t ii = 0; ii < 4; ++ii)
+	printf("    | %6.3f %6.3f %6.3f %6.3f |\n",
+	       m[ii][0], m[ii][1], m[ii][2], m[ii][3]);
+}
+
 static void product(CMATRIX p, MATRIX m)
 {
     MATRIX tmp = { { 0.0 } };
@@ -590,8 +597,14 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    MATRIX m;
 
 	    identity(m);
+	    printf("identity:\n");
+	    dumpMatrix(m);
 	    rotate(m, (float) ya, (float) ya, (float) ya);
+	    printf("rotated:\n");
+	    dumpMatrix(m);
 	    translate(m, 0., 0., 1.);
+	    printf("translated:\n");
+	    dumpMatrix(m);
 
 	    // Translate each point and save result into ramp table
 	    // buffer.
