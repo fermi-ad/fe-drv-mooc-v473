@@ -612,7 +612,7 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		project(m, point[path[ii]], b);
 		data[0][ii * 2] = uint16_t(b[0] * 32000.);
 		data[1][ii * 2] = uint16_t(b[1] * 32000.);
-		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 390;
+		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 200;
 
 		printf("%5d %5.3f %5.3f\n", data[0][ii * 2 + 1],
 		       b[0], b[1]);
