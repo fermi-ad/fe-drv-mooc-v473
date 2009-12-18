@@ -359,14 +359,19 @@ STATUS v473_setupInterrupt(V473::HANDLE const ptr, uint8_t const chan,
 
 #include <cmath>
 
-extern "C" STATUS v473_test(V473::HANDLE hw)
+STATUS v473_test(V473::HANDLE const hw, uint8_t const chan)
 {
+    if (chan >= 4) {
+	printf("channel must be less than 4.\n");
+	return ERROR;
+    }
+
     try {
 	vwpp::Lock lock(hw->mutex);
 
 	logInform0(hLog, "hardware is locked");
 
-	if (!hw->waveformEnable(lock, 0, false))
+	if (!hw->waveformEnable(lock, chan, false))
 	    throw std::runtime_error("error disabling waveform");
 
 	logInform0(hLog, "channel 0 is disabled");
@@ -381,13 +386,13 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 	}
 	data[124] = 0;
 	data[125] = 0;
-	if (!hw->setRamp(lock, 0, 1, data, 126))
+	if (!hw->setRamp(lock, chan, 1, data, 126))
 	    throw std::runtime_error("error setting ramp");
 
 	logInform0(hLog, "ramp table 1 loaded");
 
 	data[0] = 1;
-	if (!hw->setRampMap(lock, 0, 0, data, 1))
+	if (!hw->setRampMap(lock, chan, 0, data, 1))
 	    throw std::runtime_error("error setting ramp map");
 
 	logInform0(hLog, "int level 0 points to ramp 1");
@@ -395,18 +400,18 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 	// Set the scale factor to 1.0.
 
 	data[0] = 128;
-	if (!hw->setScaleFactors(lock, 0, 1, data, 1))
+	if (!hw->setScaleFactors(lock, chan, 1, data, 1))
 	    throw std::runtime_error("error setting scale factor");
 	logInform0(hLog, "set scale factor #1 to 1.0");
 	data[0] = 1;
-	if (!hw->setScaleFactorMap(lock, 0, 0, data, 1))
+	if (!hw->setScaleFactorMap(lock, chan, 0, data, 1))
 	    throw std::runtime_error("error setting scale factor map");
-	logInform0(hLog, "pointed channel 0, interrupt level 0 to scale factor");
+	logInform1(hLog, "pointed channel %d, interrupt level 0 to scale factor", chan);
 
 	// Set the offset
 
 	data[0] = 0;
-	if (!hw->setOffsetMap(lock, 0, 0, data, 1))
+	if (!hw->setOffsetMap(lock, chan, 0, data, 1))
 	    throw std::runtime_error("error setting offset map");
 	logInform0(hLog, "point to null offset");
 
@@ -420,7 +425,7 @@ extern "C" STATUS v473_test(V473::HANDLE hw)
 	if (!hw->tclkTrigEnable(lock, true))
 	    throw std::runtime_error("error enabling triggers");
 	logInform0(hLog, "enable triggering from TCLKs");
-	if (!hw->waveformEnable(lock, 0, true))
+	if (!hw->waveformEnable(lock, chan, true))
 	    throw std::runtime_error("error enabling waveform");
 	logInform0(hLog, "enable channel 0");
     }
@@ -518,9 +523,9 @@ static void rotate(MATRIX m, float const rx, float const ry, float const rz)
     product(mz, m);
 }
 
-extern "C" STATUS v473_cube(V473::HANDLE hw)
+STATUS v473_cube(V473::HANDLE const hw)
 {
-    int xa = 35;
+    int ya = 35;
     int ramp = 0;
 
     try {
