@@ -555,6 +555,9 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 	    hw->setOffsetMap(lock, 0, 0, &data, 1);
 	    hw->setOffsetMap(lock, 1, 0, &data, 1);
 
+	    uint8_t const event = 0x0f;
+
+	    hw->setTriggerMap(lock, 0, &event, 1);
 	    hw->tclkTrigEnable(lock, true);
 
 	    // Enable channels 0 and 1.
