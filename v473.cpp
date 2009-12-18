@@ -549,7 +549,7 @@ static void rotateZ(MATRIX m, float const a)
 
 STATUS v473_cube(V473::HANDLE const hw)
 {
-    int ya = 35;
+    int ya = 20;
     int ramp = 0;
 
     try {
