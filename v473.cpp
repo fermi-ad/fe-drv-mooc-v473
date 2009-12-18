@@ -608,17 +608,21 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		project(m, point[path[ii]], b);
 		data[0][ii * 2] = uint16_t(b[0] * 32000.);
 		data[1][ii * 2] = uint16_t(b[1] * 32000.);
-		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 800;
+		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 390;
 
 		printf("%5d %5d %5d\n", data[0][ii * 2 + 1],
 		       data[0][ii * 2], data[1][ii * 2]);
+
+		data[0][(ii + 1) * 2] = uint16_t(b[0] * 32000.);
+		data[1][(ii + 1) * 2] = uint16_t(b[1] * 32000.);
+		data[0][(ii + 1) * 2 + 1] = data[1][(ii + 1) * 2 + 1] = 0;
 	    }
 
 	    {
 		vwpp::Lock lock(hw->mutex);
 
-		hw->setRamp(lock, 0, ramp + 1, data[0], 128);
-		hw->setRamp(lock, 1, ramp + 1, data[1], 128);
+		hw->setRamp(lock, 0, ramp + 1, data[0], 2 * (sizeof(path) / sizeof(*path) + 1));
+		hw->setRamp(lock, 1, ramp + 1, data[1], 2 * (sizeof(path) / sizeof(*path) + 1));
 
 		// Hand the $0f event to the interrupt assigned to the
 		// next ramp.
