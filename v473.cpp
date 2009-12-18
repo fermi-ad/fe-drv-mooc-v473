@@ -577,15 +577,14 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 
 	    // Update rotation
 
-	    if ((xa += 12) >= 360)
-		xa %= 360;
+	    ya = (ya + 12) % 360;
 
 	    // Compute transform matrix
 
 	    MATRIX m;
 
 	    identity(m);
-	    rotate(m, (float) xa, 0, 0);
+	    rotate(m, 0, (float) ya, 0);
 	    translate(m, 0., 0., 1.);
 
 	    // Translate each point and save result into ramp table
