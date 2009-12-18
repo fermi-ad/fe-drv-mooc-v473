@@ -449,7 +449,7 @@ static float clip(float val, float limit)
     return std::min(std::max(val, -limit), limit);
 }
 
-int eye = 1;
+int eye = 2;
 
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
@@ -468,7 +468,7 @@ static void project(CMATRIX m, CPOINT p, float b[2])
     b[1] = clip(tmp[1] * _eye / (tmp[2] + _eye), 2.f);
 }
 
-static void dumpMatrix(CMATRIX m)
+void dumpMatrix(CMATRIX m)
 {
     for (size_t ii = 0; ii < 4; ++ii)
 	printf("    | %6.3f %6.3f %6.3f %6.3f |\n",
@@ -506,7 +506,7 @@ static void translate(MATRIX m, float const dx, float const dy,
     m[3][2] += dz;
 }
 
-static void rotateX(MATRIX m, float const a)
+void rotateX(MATRIX m, float const a)
 {
     float const r = (2.0 * M_PI / 360.0) * a;
     float const s = sin(r);
@@ -522,7 +522,7 @@ static void rotateX(MATRIX m, float const a)
     product(mx, m);
 }
 
-static void rotateY(MATRIX m, float const a)
+void rotateY(MATRIX m, float const a)
 {
     float const r = (2.0 * M_PI / 360.0) * a;
     float const s = sin(r);
@@ -538,7 +538,7 @@ static void rotateY(MATRIX m, float const a)
     product(my, m);
 }
 
-static void rotateZ(MATRIX m, float const a)
+void rotateZ(MATRIX m, float const a)
 {
     float const r = (2.0 * M_PI / 360.0) * a;
     float const s = sin(r);
@@ -620,28 +620,15 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    MATRIX m;
 
 	    identity(m);
-	    printf("identity:\n");
-	    dumpMatrix(m);
-	    rotateX(m, 0.);
-	    printf("rotated around X:\n");
-	    dumpMatrix(m);
+	    //rotateX(m, 0.);
 	    rotateY(m, (float) ya);
-	    printf("rotated around Y:\n");
-	    dumpMatrix(m);
-	    rotateZ(m, 0.);
-	    printf("rotated around Z:\n");
-	    dumpMatrix(m);
+	    //rotateZ(m, 0.);
 	    translate(m, 0., 0., 2.);
-	    printf("translated:\n");
-	    dumpMatrix(m);
 
 	    // Translate each point and save result into ramp table
 	    // buffer.
 
 	    uint16_t data[2][2 * (sizeof(path) / sizeof(*path) + 1)];
-
-	    printf("   dt     x     y     z    x'    y'\n"
-		   "----- ----- ----- ----- ----- -----\n");
 
 	    for (size_t ii = 0; ii < sizeof(path) / sizeof(*path); ++ii) {
 		static POINT const point[] = {
@@ -660,9 +647,6 @@ STATUS v473_cube(V473::HANDLE const hw)
 		data[0][ii * 2] = uint16_t(b[0] * 16000.);
 		data[1][ii * 2] = uint16_t(b[1] * 16000.);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 300;
-
-		printf("%5d %5.3f %5.3f\n", data[0][ii * 2 + 1],
-		       b[0], b[1]);
 
 		data[0][(ii + 1) * 2] = uint16_t(b[0] * 16000.);
 		data[1][(ii + 1) * 2] = uint16_t(b[1] * 16000.);
