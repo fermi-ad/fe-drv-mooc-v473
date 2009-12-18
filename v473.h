@@ -289,7 +289,8 @@ extern "C" {
     V473::HANDLE v473_create(int, int);
     STATUS v473_destroy(V473::HANDLE);
     STATUS v473_setupInterrupt(int, int, int, int, int, int, int, int, int);
-    STATUS v473_test(V473::HANDLE);
+    STATUS v473_test(V473::HANDLE, uint8_t);
+    STATUS v473_cube(V473::HANDLE);
 };
 
 // Local Variables:
