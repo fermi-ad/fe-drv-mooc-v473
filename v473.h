@@ -237,9 +237,7 @@ namespace V473 {
 		     uint16_t const ramp, uint16_t const* const ptr,
 		     uint16_t const n)
 	{
-	    return writeBank(lock, chan,
-			     (ChannelProperty)((ramp << 7) + 0x1000 * chan),
-			     0, ptr, n);
+	    return writeBank(lock, chan, (ChannelProperty)(ramp << 7), 0, ptr, n);
 	}
 
 	bool setRampMap(vwpp::Lock const& lock, uint16_t const chan,
