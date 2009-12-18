@@ -640,8 +640,8 @@ STATUS v473_cube(V473::HANDLE const hw)
 
 	    uint16_t data[2][2 * (sizeof(path) / sizeof(*path) + 1)];
 
-	    printf("   dt     x     y\n"
-		   "----- ----- -----\n");
+	    printf("   dt     x     y     z    x'    y'\n"
+		   "----- ----- ----- ----- ----- -----\n");
 
 	    for (size_t ii = 0; ii < sizeof(path) / sizeof(*path); ++ii) {
 		static POINT const point[] = {
@@ -661,7 +661,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 		data[1][ii * 2] = uint16_t(b[1] * 16000.);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 300;
 
-		printf("%5d %5.3f %5.3f\n", data[0][ii * 2 + 1],
+		printf("%5d %5.3f %5.3f %5.3f %5.3f %5.3f\n", data[0][ii * 2 + 1],
 		       b[0], b[1]);
 
 		data[0][(ii + 1) * 2] = uint16_t(b[0] * 16000.);
@@ -689,7 +689,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 		taskDelay(4);
 		ramp = !ramp;
 	    }
-	} while (false);
+	} while (true);
     }
     catch (std::exception const& e) {
 	printf("caught: %s\n", e.what());
