@@ -499,46 +499,55 @@ static void translate(MATRIX m, float const dx, float const dy,
     m[3][2] += dz;
 }
 
-static void rotate(MATRIX m, float const rx, float const ry, float const rz)
+static void rotateX(MATRIX m, float const a)
 {
-    float const rrx = (2.0 * M_PI / 360.0) * rx;
-    float const rry = (2.0 * M_PI / 360.0) * ry;
-    float const rrz = (2.0 * M_PI / 360.0) * rz;
-
-    float const sx = sin(rrx);
-    float const cx = cos(rrx);
-    float const sy = sin(rry);
-    float const cy = cos(rry);
-    float const sz = sin(rrz);
-    float const cz = cos(rrz);
+    float const r = (2.0 * M_PI / 360.0) * a;
+    float const s = sin(r);
+    float const c = cos(r);
 
     CMATRIX mx = {
 	{1., 0., 0., 0.},
-	{0., cx, sx, 0.},
-	{0., -sx, cx, 0.},
+	{0.,  c,  s, 0.},
+	{0., -s,  c, 0.},
 	{0., 0., 0., 1.}
     };
 
     product(mx, m);
+}
+
+#if 0
+static void rotateY(MATRIX m, float const a)
+{
+    float const r = (2.0 * M_PI / 360.0) * a;
+    float const s = sin(r);
+    float const c = cos(r);
 
     CMATRIX my = {
-	{cy, 0., -sy, 0.},
+	{ c, 0., -s, 0.},
 	{0., 1., 0., 0.},
-	{sy, 0., cy, 0.},
+	{ s, 0.,  c, 0.},
 	{0., 0., 0., 1.}
     };
 
     product(my, m);
+}
+
+static void rotateZ(MATRIX m, float const a)
+{
+    float const r = (2.0 * M_PI / 360.0) * a;
+    float const s = sin(r);
+    float const c = cos(r);
 
     CMATRIX mz = {
-	{cz, -sz, 0., 0.},
-	{sz, cz, 0., 0.},
+	{ c, -s, 0., 0.},
+	{ s,  c, 0., 0.},
 	{0., 0., 1., 0.},
 	{0., 0., 0., 1.}
     };
 
     product(mz, m);
 }
+#endif
 
 STATUS v473_cube(V473::HANDLE const hw)
 {
@@ -608,7 +617,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    identity(m);
 	    printf("identity:\n");
 	    dumpMatrix(m);
-	    rotate(m, (float) ya, (float) ya, (float) ya);
+	    rotateX(m, (float) ya);
 	    printf("rotated:\n");
 	    dumpMatrix(m);
 	    translate(m, 0., 0., 1.);
