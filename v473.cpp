@@ -629,8 +629,8 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    {
 		vwpp::Lock lock(hw->mutex);
 
-		hw->setRamp(lock, 0, ramp + 1, data[0], 2 * (sizeof(path) / sizeof(*path) + 1));
 		hw->setRamp(lock, 1, ramp + 1, data[1], 2 * (sizeof(path) / sizeof(*path) + 1));
+		hw->setRamp(lock, 0, ramp + 1, data[0], 2 * (sizeof(path) / sizeof(*path) + 1));
 
 		// Hand the $0f event to the interrupt assigned to the
 		// next ramp.
