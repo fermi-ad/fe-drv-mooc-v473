@@ -463,15 +463,20 @@ static void dumpMatrix(CMATRIX m)
 	       m[ii][0], m[ii][1], m[ii][2], m[ii][3]);
 }
 
-static void product(CMATRIX p, MATRIX m)
+static void product(CMATRIX const p, MATRIX m)
 {
-    MATRIX tmp = { { 0.0 } };
+    MATRIX tmp;
 
     for (size_t row = 0; row < 4; ++row)
 	for (size_t col = 0; col < 4; ++col)
-	    for (size_t ii = 0; ii < 4; ++ii)
-		tmp[row][col] += m[row][ii] * p[ii][col];
-    m = tmp;
+	    tmp[row][col] =
+		m[row][0] * p[0][col] +
+		m[row][1] * p[1][col] +
+		m[row][2] * p[2][col] +
+		m[row][3] * p[3][col];
+    for (size_t row = 0; row < 4; ++row)
+	for (size_t col = 0; col < 4; ++col)
+	    m[row][col] = tmp[row][col];
 }
 
 static void identity(MATRIX m)
