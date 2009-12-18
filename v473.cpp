@@ -445,9 +445,9 @@ static void project(CMATRIX m, CPOINT p, float b[2])
 
     for (size_t row = 0; row < 4; ++row)
 	for (size_t col = 0; col < 4; ++col)
-	    tmp[row] = m[row][col] * p[col];
-    b[0] = std::min(tmp[0] * 5 / (std::max(tmp[2], 0.f) + 5), 1.f);
-    b[1] = std::min(tmp[1] * 5 / (std::max(tmp[2], 0.f) + 5), 1.f);
+	    tmp[row] += m[row][col] * p[col];
+    b[0] = std::min(tmp[0] * 5.f / (std::max(tmp[2], 0.f) + 5.f), 1.f);
+    b[1] = std::min(tmp[1] * 5.f / (std::max(tmp[2], 0.f) + 5.f), 1.f);
 }
 
 static void product(CMATRIX p, MATRIX m)
@@ -606,8 +606,8 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		float b[2];
 
 		project(m, point[path[ii]], b);
-		data[0][ii * 2] = uint16_t(b[0] * 32000);
-		data[1][ii * 2] = uint16_t(b[1] * 32000);
+		data[0][ii * 2] = uint16_t(b[0] * 32000.);
+		data[1][ii * 2] = uint16_t(b[1] * 32000.);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 800;
 
 		printf("%5d %5d %5d\n", data[0][ii * 2 + 1],
