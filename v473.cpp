@@ -564,11 +564,11 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    hw->setOffsetMap(lock, 0, 1, &data, 1);
 	    hw->setOffsetMap(lock, 1, 0, &data, 1);
 	    hw->setOffsetMap(lock, 1, 1, &data, 1);
+	    hw->tclkTrigEnable(lock, true);
 
 	    uint8_t const event = 0x0f;
 
 	    hw->setTriggerMap(lock, 0, &event, 1);
-	    hw->tclkTrigEnable(lock, true);
 
 	    // Enable channels 0 and 1.
 
