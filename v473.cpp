@@ -210,7 +210,7 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 40 milliseconds for a response.
 
-    unsigned long const start = ppcTick();
+    //unsigned long const start = ppcTick();
     bool const result = intDone.wait(40);
 
     //logInform1(hLog, "readProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
@@ -229,7 +229,7 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 40 milliseconds for a response.
 
-    unsigned long const start = ppcTick();
+    //unsigned long const start = ppcTick();
     bool const result = intDone.wait(40);
 
     //logInform1(hLog, "setProperty(): took %ld uS", ticks_to_uS(ppcTick() - start));
