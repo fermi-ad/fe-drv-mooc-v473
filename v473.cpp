@@ -614,8 +614,8 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 		data[1][ii * 2] = uint16_t(b[1] * 32000.);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 390;
 
-		printf("%5d %5d %5d\n", data[0][ii * 2 + 1],
-		       data[0][ii * 2], data[1][ii * 2]);
+		printf("%5d %5.3f %5.3f\n", data[0][ii * 2 + 1],
+		       b[0], b[1]);
 
 		data[0][(ii + 1) * 2] = uint16_t(b[0] * 32000.);
 		data[1][(ii + 1) * 2] = uint16_t(b[1] * 32000.);
