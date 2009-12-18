@@ -528,7 +528,7 @@ static void rotate(MATRIX m, float const rx, float const ry, float const rz)
     CMATRIX mz = {
 	{cz, -sz, 0., 0.},
 	{sz, cz, 0., 0.},
-	{0., 0., 0., 0.},
+	{0., 0., 1., 0.},
 	{0., 0., 0., 1.}
     };
 
