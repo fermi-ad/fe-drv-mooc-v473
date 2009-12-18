@@ -661,7 +661,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 		data[1][ii * 2] = uint16_t(b[1] * 16000.);
 		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 300;
 
-		printf("%5d %5.3f %5.3f %5.3f %5.3f %5.3f\n", data[0][ii * 2 + 1],
+		printf("%5d %5.3f %5.3f\n", data[0][ii * 2 + 1],
 		       b[0], b[1]);
 
 		data[0][(ii + 1) * 2] = uint16_t(b[0] * 16000.);
