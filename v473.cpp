@@ -449,10 +449,12 @@ static float clip(float val, float limit)
     return std::min(std::max(val, -limit), limit);
 }
 
+int eye = 1;
+
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
     POINT tmp;
-    float const eye = 1.5f;
+    float const _eye = eye;
 
     for (size_t row = 0; row < 3; ++row)
 	for (size_t col = 0; col < 4; ++col)
@@ -462,8 +464,8 @@ static void project(CMATRIX m, CPOINT p, float b[2])
 		m[row][2] * p[2] +
 		m[row][3];
 
-    b[0] = clip(tmp[0] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
-    b[1] = clip(tmp[1] * eye / (std::max(tmp[2], 0.f) + eye), 2.f);
+    b[0] = clip(tmp[0] * _eye / (std::max(tmp[2], 0.f) + _eye), 2.f);
+    b[1] = clip(tmp[1] * _eye / (std::max(tmp[2], 0.f) + _eye), 2.f);
 }
 
 static void dumpMatrix(CMATRIX m)
