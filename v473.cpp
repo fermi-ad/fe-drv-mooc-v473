@@ -470,8 +470,7 @@ static void product(CMATRIX p, MATRIX m)
     for (size_t row = 0; row < 4; ++row)
 	for (size_t col = 0; col < 4; ++col)
 	    for (size_t ii = 0; ii < 4; ++ii)
-		for (size_t jj = 0; jj < 4; ++jj)
-		    tmp[row][col] += m[ii][jj] * p[jj][ii];
+		tmp[row][col] += m[row][ii] * p[ii][col];
     m = tmp;
 }
 
