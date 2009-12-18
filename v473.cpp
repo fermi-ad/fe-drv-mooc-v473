@@ -447,7 +447,7 @@ typedef float const CMATRIX[4][4];
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
     POINT tmp = { 0.0 };
-    float const eye = 2.5f;
+    float const eye = 1.5f;
 
     for (size_t row = 0; row < 4; ++row)
 	for (size_t col = 0; col < 4; ++col)
@@ -590,7 +590,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    MATRIX m;
 
 	    identity(m);
-	    rotate(m, 0, (float) ya, 0);
+	    rotate(m, (float) ya, (float) ya, (float) ya);
 	    translate(m, 0., 0., 1.);
 
 	    // Translate each point and save result into ramp table
