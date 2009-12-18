@@ -520,7 +520,7 @@ static void rotate(MATRIX m, float const rx, float const ry, float const rz)
 
 extern "C" STATUS v473_cube(V473::HANDLE hw)
 {
-    int xa = 0;
+    int xa = 35;
     int ramp = 0;
 
     try {
