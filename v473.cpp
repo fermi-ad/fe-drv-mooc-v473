@@ -572,7 +572,7 @@ extern "C" STATUS v473_cube(V473::HANDLE hw)
 
 	do {
 	    static size_t const path[] = {
-		1, 2, 3, 4, 8, 7, 6, 5, 1, 4, 3, 7, 8, 5, 6, 2, 1
+		0, 1, 2, 3, 7, 6, 5, 4, 0, 3, 2, 6, 7, 4, 5, 1, 0
 	    };
 
 	    // Update rotation
