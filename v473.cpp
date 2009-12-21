@@ -451,6 +451,9 @@ static float clip(float val, float limit)
 
 int v473_eye = 2;
 int v473_delta = 300;
+int v473_rotx = 0;
+int v473_roty = 0;
+int v473_rotz = 0;
 
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
@@ -557,7 +560,9 @@ void rotateZ(MATRIX m, float const a)
 
 STATUS v473_cube(V473::HANDLE const hw)
 {
+    int xa = 0;
     int ya = 0;
+    int za = 0;
     int ramp = 0;
 
     try {
@@ -614,16 +619,18 @@ STATUS v473_cube(V473::HANDLE const hw)
 
 	    // Update rotation
 
-	    ya = (ya + 4) % 360;
+	    xa = (xa + v473_rotx + 360) % 360;
+	    ya = (ya + v473_roty + 360) % 360;
+	    za = (za + v473_rotz + 360) % 360;
 
 	    // Compute transform matrix
 
 	    MATRIX m;
 
 	    identity(m);
-	    //rotateX(m, ya * 2.3);
-	    rotateY(m, (float) ya);
-	    //rotateZ(m, 0.);
+	    rotateX(m, xa);
+	    rotateY(m, ya);
+	    rotateZ(m, za);
 	    translate(m, 0., 0., 2.);
 
 	    // Translate each point and save result into ramp table
