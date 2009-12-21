@@ -21,9 +21,10 @@ static void term(void)
 
 // This function initializes an instance of the MOOC V473 class.
 
-static STATUS objInit(short const oid, void const*, void const*,
-		      void* ivs)
+static STATUS objInit(short const oid, V473::Card* const ptr, void const*,
+		      V473::Card** const ivs)
 {
+    *ivs = ptr;
     return OK;
 }
 
