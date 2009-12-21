@@ -449,12 +449,13 @@ static float clip(float val, float limit)
     return std::min(std::max(val, -limit), limit);
 }
 
-int eye = 2;
+int v473_eye = 2;
+int v473_delta = 300;
 
 static void project(CMATRIX m, CPOINT p, float b[2])
 {
     POINT tmp;
-    float const _eye = eye;
+    float const eye = v473_eye;
 
     for (size_t row = 0; row < 3; ++row)
 	for (size_t col = 0; col < 4; ++col)
@@ -464,8 +465,8 @@ static void project(CMATRIX m, CPOINT p, float b[2])
 		m[row][2] * p[2] +
 		m[row][3];
 
-    b[0] = clip(tmp[0] * _eye / (tmp[2] + _eye), 2.f);
-    b[1] = clip(tmp[1] * _eye / (tmp[2] + _eye), 2.f);
+    b[0] = clip(tmp[0] * eye / (tmp[2] + eye), 2.f);
+    b[1] = clip(tmp[1] * eye / (tmp[2] + eye), 2.f);
 }
 
 void dumpMatrix(CMATRIX m)
@@ -646,7 +647,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 		project(m, point[path[ii]], b);
 		data[0][ii * 2] = uint16_t(b[0] * 16000.);
 		data[1][ii * 2] = uint16_t(b[1] * 16000.);
-		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = 300;
+		data[0][ii * 2 + 1] = data[1][ii * 2 + 1] = v473_delta;
 
 		data[0][(ii + 1) * 2] = uint16_t(b[0] * 16000.);
 		data[1][(ii + 1) * 2] = uint16_t(b[1] * 16000.);
