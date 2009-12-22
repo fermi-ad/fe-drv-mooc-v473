@@ -48,50 +48,55 @@ static STATUS objInit(short const oid, V473::Card* const ptr, void const*,
 static STATUS devReading(short const cls, RS_REQ const* const req,
 			 void* const rep, V473::Card* const* const ivs)
 {
-    switch (REQ_TO_SUBCODE(req)) {
-     case 1:		// G(i) tables. We dont have these, so fake it.
-	if (rep)
-	    memset(rep, 0, req->ILEN);
-	break;
+    try {
+	switch (REQ_TO_SUBCODE(req)) {
+	 case 1:		// G(i) tables. We dont have these, so fake it.
+	    if (rep)
+		memset(rep, 0, req->ILEN);
+	    break;
 
-     case 2:		// F(t) tables.
-	 {
-	     static size_t const entrySize = 4;
-	     static size_t const maxSize = 15 * 64 * entrySize;
-	     size_t const length = req->ILEN;
-	     size_t const offset = req->OFFSET;
+	 case 2:		// F(t) tables.
+	     {
+		 static size_t const entrySize = 4;
+		 static size_t const maxSize = 15 * 64 * entrySize;
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
 
-	     if (REQ_TO_CHAN(req) >= 4)
-		 return ERR_BADCHN;
-	     if (length % 4 || length >= maxSize)
-		 return ERR_BADLEN;
-	     if (offset % 4 || offset >= maxSize - entrySize)
-		 return ERR_BADOFF;
-	     if (offset + length >= maxSize)
-		 return ERR_BADOFLEN;
+		 if (REQ_TO_CHAN(req) >= 4)
+		     return ERR_BADCHN;
+		 if (length % 4 || length >= maxSize)
+		     return ERR_BADLEN;
+		 if (offset % 4 || offset >= maxSize - entrySize)
+		     return ERR_BADOFF;
+		 if (offset + length >= maxSize)
+		     return ERR_BADOFLEN;
 
-	     vwpp::Lock lock((*ivs)->mutex);
+		 vwpp::Lock lock((*ivs)->mutex);
 
-	     static size_t const rampSize = 64 * entrySize;
+		 static size_t const rampSize = 64 * entrySize;
 
-	     if (!(*ivs)->getRamp(lock, REQ_TO_CHAN(req),
-				  offset / rampSize + 1,
-				  (offset % rampSize) / 4,
-				  (uint16_t*) rep, length / 2))
-		 return ERR_MISBOARD;
-	 }
-	 break;
+		 if (!(*ivs)->getRamp(lock, REQ_TO_CHAN(req),
+				      offset / rampSize + 1,
+				      (offset % rampSize) / 4,
+				      (uint16_t*) rep, length / 2))
+		     return ERR_MISBOARD;
+	     }
+	     break;
 
-     case 3 ... 4:
-     case 9 ... 10:
-	 {
-	 }
-	 break;
+	 case 3 ... 4:
+	 case 9 ... 10:
+	     {
+	     }
+	     break;
 
-     default:
-	return ERR_BADPROP;
+	 default:
+	    return ERR_BADPROP;
+	}
+	return OK;
     }
-    return OK;
+    catch (std::exception const& e) {
+	return ERR_DEVICEERROR;
+    }
 }
 
 // Creates an instance of the MOOC V473 class.
@@ -111,7 +116,7 @@ STATUS v473_create_mooc_instance(unsigned short const oid,
 	if (create_instance(oid, cls, ptr.get(), "V473") != NOERR)
 	    throw std::runtime_error("problem creating an instance");
 
-	printf("New instance of V473 created. Underlying object @ %p\n", ptr.release());
+	printf("New instance of V473 created. Underlying object @ %p.\n", ptr.release());
 	return OK;
     }
     catch (std::exception const& e) {
