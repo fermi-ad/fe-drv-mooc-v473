@@ -5,6 +5,23 @@
 #include <mooc++-4.0.h>
 #include "v473.h"
 
+typedef unsigned char chan_t;
+typedef unsigned char type_t;
+
+#define OMSPDEF_TO_CHAN(a)	((chan_t) (a).chan)
+#define OMSPDEF_TO_TYPE(a)	((type_t) (a).typ)
+
+#define	REQ_TO_CHAN(a)	OMSPDEF_TO_CHAN(*(OMSP_DEF const*) &(a)->OMSP)
+#define	REQ_TO_TYPE(a)	OMSPDEF_TO_TYPE(*(OMSP_DEF const*) &(a)->OMSP)
+#define REQ_TO_SUBCODE(req)   ((((OMSP_DEF const*)&(req)->OMSP)->chan & 0xf0) >> 4)
+#define REQ_TO_453CHAN(req)   (((OMSP_DEF const*)&(req)->OMSP)->chan & 0x3)
+// for Subcode 15 only...
+#define REQ_TO_453TYPE(req)  ((((OMSP_DEF*)&(req)->OMSP)->typ >> 6) & 0x3)
+#define REQ_TO_TABLE(req) (((OMSP_DEF*)&(req)->OMSP)->typ & 0x3f)
+#define REQ_TO_START(req) ((req)->misc2 & 0xff)
+#define REQ_TO_DELTA(req) ((req)->misc2 >> 12)
+#define REQ_TO_TOTAL(req) (((req)->misc2 >> 8) & 0xf)
+
 // Local prototypes...
 
 static void term(void) __attribute__((destructor));
@@ -27,6 +44,57 @@ static STATUS objInit(short const oid, V473::Card* const ptr, void const*,
     *ivs = ptr;
     return OK;
 }
+
+static STATUS devReading(short const cls, RS_REQ const* const req,
+			 void* const rep, V473::Card* const* const ivs)
+{
+    switch (REQ_TO_SUBCODE(req)) {
+     case 1:		// G(i) tables. We dont have these, so fake it.
+	if (rep)
+	    memset(rep, 0, req->ILEN);
+	break;
+
+     case 2:		// F(t) tables.
+	 {
+	     static size_t const entrySize = 4;
+	     static size_t const maxSize = 15 * 64 * entrySize;
+	     size_t const length = req->ILEN;
+	     size_t const offset = req->OFFSET;
+
+	     if (REQ_TO_CHAN(req) >= 4)
+		 return ERR_BADCHN;
+	     if (length % 4 || length >= maxSize)
+		 return ERR_BADLEN;
+	     if (offset % 4 || offset >= maxSize - entrySize)
+		 return ERR_BADOFF;
+	     if (offset + length >= maxSize)
+		 return ERR_BADOFLEN;
+
+	     vwpp::Lock lock((*ivs)->mutex);
+
+	     static size_t const rampSize = 64 * entrySize;
+
+	     if (!(*ivs)->getRamp(lock, REQ_TO_CHAN(req),
+				  offset / rampSize + 1,
+				  (offset % rampSize) / 4,
+				  (uint16_t*) rep, length / 2))
+		 return ERR_MISBOARD;
+	 }
+	 break;
+
+     case 3 ... 4:
+     case 9 ... 10:
+	 {
+	 }
+	 break;
+
+     default:
+	return ERR_BADPROP;
+    }
+    return OK;
+}
+
+// Creates an instance of the MOOC V473 class.
 
 STATUS v473_create_mooc_instance(unsigned short const oid,
 				 uint8_t const addr,
@@ -62,12 +130,16 @@ STATUS v473_create_mooc_class(uint8_t cls)
 	return ERROR;
     }
 
-    if (NOERR != create_class(cls, 0, 0, 1, sizeof(V473::Card*)))
+    if (NOERR != create_class(cls, 0, 0, 3, sizeof(V473::Card*)))
 	return ERROR;
     if (NOERR != name_class(cls, "V473"))
 	return ERROR;
     if (NOERR != add_class_msg(cls, Init, (PMETHOD) objInit))
-	return NOERR;
+	return ERROR;
+    if (NOERR != add_class_msg(cls, rPRREAD, (PMETHOD) devReading))
+	return ERROR;
+    if (NOERR != add_class_msg(cls, rPRSET, (PMETHOD) devReading))
+	return ERROR;
 
     return OK;
 }
