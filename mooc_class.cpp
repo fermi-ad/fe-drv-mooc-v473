@@ -111,7 +111,7 @@ STATUS v473_create_mooc_instance(unsigned short const oid,
 	if (create_instance(oid, cls, ptr.get(), "V473") != NOERR)
 	    throw std::runtime_error("problem creating an instance");
 
-	ptr.release();
+	printf("New instance of V473 created. Underlying object @ %p\n", ptr.release());
 	return OK;
     }
     catch (std::exception const& e) {
@@ -130,16 +130,27 @@ STATUS v473_create_mooc_class(uint8_t cls)
 	return ERROR;
     }
 
-    if (NOERR != create_class(cls, 0, 0, 3, sizeof(V473::Card*)))
+    if (NOERR != create_class(cls, 0, 0, 3, sizeof(V473::Card*))) {
+	printf("Error returned from create_class()!\n");
 	return ERROR;
-    if (NOERR != name_class(cls, "V473"))
+    }
+    if (NOERR != name_class(cls, "V473")) {
+	printf("Error trying to name the class.\n");
 	return ERROR;
-    if (NOERR != add_class_msg(cls, Init, (PMETHOD) objInit))
+    }
+    if (NOERR != add_class_msg(cls, Init, (PMETHOD) objInit)) {
+	printf("Error trying to add the Init handler.\n");
 	return ERROR;
-    if (NOERR != add_class_msg(cls, rPRREAD, (PMETHOD) devReading))
+    }
+    if (NOERR != add_class_msg(cls, rPRREAD, (PMETHOD) devReading)) {
+	printf("Error trying to add the reading handler.\n");
 	return ERROR;
-    if (NOERR != add_class_msg(cls, rPRSET, (PMETHOD) devReading))
+    }
+    if (NOERR != add_class_msg(cls, rPRSET, (PMETHOD) devReading)) {
+	printf("Error trying to add the reading-of-the-setting handler.\n");
 	return ERROR;
+    }
 
+    printf("V473 class successfully registerde with MOOC.\n");
     return OK;
 }
