@@ -382,7 +382,7 @@ STATUS v473_test(V473::HANDLE const hw, uint8_t const chan)
 	}
 	data[124] = 0;
 	data[125] = 0;
-	if (!hw->setRamp(lock, chan, 1, data, 126))
+	if (!hw->setRamp(lock, chan, 1, 0, data, 126))
 	    throw std::runtime_error("error setting ramp");
 
 	logInform0(hLog, "ramp table 1 loaded");
