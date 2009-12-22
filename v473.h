@@ -155,12 +155,13 @@ namespace V473 {
 	}
 
 	bool getRamp(vwpp::Lock const& lock, uint16_t const chan,
-		     uint16_t const ramp, uint16_t* const ptr,
-		     uint16_t const n)
+		     uint16_t const ramp, uint16_t const offset,
+		     uint16_t* const ptr, uint16_t const n)
 	{
-	    return readBank(lock, chan,
-			    (ChannelProperty) ((ramp << 7) + 0x1000 * chan),
-			    0, ptr, n);
+	    if (offset >= 64)
+		throw std::logic_error("offset should be less than 64");
+	    return readBank(lock, chan, ChannelProperty(ramp << 7),
+			    2 * offset, ptr, n);
 	}
 
 	bool getRampMap(vwpp::Lock const& lock, uint16_t const chan,
@@ -234,10 +235,13 @@ namespace V473 {
 	}
 
 	bool setRamp(vwpp::Lock const& lock, uint16_t const chan,
-		     uint16_t const ramp, uint16_t const* const ptr,
-		     uint16_t const n)
+		     uint16_t const ramp, uint16_t const offset,
+		     uint16_t const* const ptr, uint16_t const n)
 	{
-	    return writeBank(lock, chan, (ChannelProperty)(ramp << 7), 0, ptr, n);
+	    if (offset >= 64)
+		throw std::logic_error("offset should be less than 64");
+	    return writeBank(lock, chan, ChannelProperty(ramp << 7),
+			     2 * offset, ptr, n);
 	}
 
 	bool setRampMap(vwpp::Lock const& lock, uint16_t const chan,
