@@ -71,9 +71,13 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 		 if (offset + length >= maxSize)
 		     return ERR_BADOFLEN;
 
-		 vwpp::Lock lock((*ivs)->mutex);
-
 		 static size_t const rampSize = 64 * entrySize;
+
+		 printf("Accepted request: chan %d, ramp %d, offset %d, len %d\n",
+			REQ_TO_CHAN(req), offset / rampSize + 1,
+			(offset % rampSize) / 4, length / 2);
+
+		 vwpp::Lock lock((*ivs)->mutex);
 
 		 if (!(*ivs)->getRamp(lock, REQ_TO_CHAN(req),
 				      offset / rampSize + 1,
@@ -94,7 +98,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 	}
 	return OK;
     }
-    catch (std::exception const& e) {
+    catch (std::exception const&) {
 	return ERR_DEVICEERROR;
     }
 }
