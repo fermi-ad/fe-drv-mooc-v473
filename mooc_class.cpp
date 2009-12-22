@@ -62,7 +62,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 		 size_t const length = req->ILEN;
 		 size_t const offset = req->OFFSET;
 
-		 if (REQ_TO_CHAN(req) >= 4)
+		 if (REQ_TO_453CHAN(req) >= 4)
 		     return ERR_BADCHN;
 		 if (length % 4 || length >= maxSize)
 		     return ERR_BADLEN;
@@ -79,7 +79,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 
 		 vwpp::Lock lock((*ivs)->mutex);
 
-		 if (!(*ivs)->getRamp(lock, REQ_TO_CHAN(req),
+		 if (!(*ivs)->getRamp(lock, REQ_TO_453CHAN(req),
 				      offset / rampSize + 1,
 				      (offset % rampSize) / 4,
 				      (uint16_t*) rep, length / 2))
