@@ -247,6 +247,6 @@ STATUS v473_create_mooc_class(uint8_t cls)
 	return ERROR;
     }
 
-    printf("V473 class successfully registerde with MOOC.\n");
+    printf("V473 class successfully registered with MOOC.\n");
     return OK;
 }
