@@ -1,5 +1,6 @@
 // $Id$
 
+#include <vxWorks.h>
 #include <cstdio>
 #include <memory>
 #include <mooc++-4.0.h>
@@ -57,11 +58,11 @@ static STATUS readSimpleTable(RS_REQ const* req, size_t const entrySize,
 {
     if (REQ_TO_453CHAN(req) >= 4)
 	return ERR_BADCHN;
-    if (req->ILEN % entrySize || req->ILEN >= maxSize)
+    if (req->ILEN % entrySize || req->ILEN > maxSize)
 	return ERR_BADLEN;
-    if (req->OFFSET % entrySize || req->OFFSET >= maxSize - entrySize)
+    if (req->OFFSET % entrySize || req->OFFSET > maxSize - entrySize)
 	return ERR_BADOFF;
-    if (req->OFFSET + req->ILEN >= maxSize)
+    if (req->OFFSET + req->ILEN > maxSize)
 	return ERR_BADOFLEN;
 
     vwpp::Lock lock(obj->mutex);
@@ -91,11 +92,11 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 
 		 if (REQ_TO_453CHAN(req) >= 4)
 		     return ERR_BADCHN;
-		 if (length % entrySize || length >= maxSize)
+		 if (length % entrySize || length > maxSize)
 		     return ERR_BADLEN;
-		 if (offset % entrySize || offset >= maxSize - entrySize)
+		 if (offset % entrySize || offset > maxSize - entrySize)
 		     return ERR_BADOFF;
-		 if (offset + length >= maxSize)
+		 if (offset + length > maxSize)
 		     return ERR_BADOFLEN;
 
 		 static size_t const rampSize = 64 * entrySize;
@@ -118,6 +119,50 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 	    return readSimpleTable(req, 2, 64, *ivs,
 				   &V473::Card::getOffsets,
 				   (uint16_t*) rep);
+
+	 case 5:
+	     {
+		 static STableCallback const mt[] = {
+		     &V473::Card::getRampMap,
+		     &V473::Card::getScaleFactorMap,
+		     &V473::Card::getOffsetMap,
+		     &V473::Card::getFrequencyMap,
+		     &V473::Card::getPhaseMap
+		 };
+		 static size_t const nTables = sizeof(mt) / sizeof(*mt);
+		 static size_t const entrySize = 2;
+		 static size_t const tableSize = 32 * entrySize;
+		 static size_t const maxSize = nTables * tableSize;
+
+		 size_t length = req->ILEN;
+		 size_t offset = req->OFFSET;
+		 uint16_t* ptr = (uint16_t*) rep;
+
+		 if (REQ_TO_453CHAN(req) >= 4)
+		     return ERR_BADCHN;
+		 if (length % entrySize || length > maxSize)
+		     return ERR_BADLEN;
+		 if (offset % entrySize || offset > maxSize - entrySize)
+		     return ERR_BADOFF;
+		 if (offset + length > maxSize)
+		     return ERR_BADOFLEN;
+
+		 vwpp::Lock lock((*ivs)->mutex);
+
+		 for (size_t ii = 0; length > 0 && ii < nTables; ++ii)
+		     if (offset < ii * tableSize) {
+			 size_t const total(std::min(length, (ii * tableSize) - offset));
+
+			 if (!((*ivs)->*mt[ii])(lock, REQ_TO_453CHAN(req),
+						(offset % 64) / 2,
+						ptr, total / 2))
+			     return ERR_MISBOARD;
+			 ptr += total / 2;
+			 offset += total;
+			 length -= total;
+		     }
+		 return NOERR;
+	     }
 
 	 case 6:		// Scale Factor Table
 	    return readSimpleTable(req, 2, 64, *ivs,
