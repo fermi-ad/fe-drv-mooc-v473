@@ -185,9 +185,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 	return OK;
     }
     catch (std::exception const& e) {
-	printf("%s: exception '%s'\n"
-	       "(BTW, the mutex is at %p\n", __func__, e.what(),
-	       &(*ivs)->mutex);
+	printf("%s: exception '%s'\n", __func__, e.what())
 	return ERR_DEVICEERROR;
     }
 }

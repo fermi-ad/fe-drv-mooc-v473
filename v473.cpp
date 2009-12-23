@@ -239,9 +239,6 @@ bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
     if (start >= 32)
 	throw std::logic_error("interrupt level out of range");
 
-    printf("%s: chan %d, prop 0x%06x, start %d, ptr %p, n %d\n",
-	   __func__, chan, prop, start, ptr, n);
-
     if (readProperty(lock, GEN_ADDR(chan, prop, start), n)) {
 	for (uint16_t ii = 0; ii < n; ++ii)
 	    ptr[ii] = sysIn16(dataBuffer + ii);
