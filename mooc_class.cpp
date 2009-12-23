@@ -119,10 +119,20 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 				   &V473::Card::getOffsets,
 				   (uint16_t*) rep);
 
-	 case 9 ... 10:
-	     {
-	     }
-	     break;
+	 case 6:		// Scale Factor Table
+	    return readSimpleTable(req, 2, 64, *ivs,
+				   &V473::Card::getScaleFactors,
+				   (uint16_t*) rep);
+
+	 case 9:		// Frequency Table
+	    return readSimpleTable(req, 2, 64, *ivs,
+				   &V473::Card::getFrequencies,
+				   (uint16_t*) rep);
+
+	 case 10:		// Phase Table
+	    return readSimpleTable(req, 2, 64, *ivs,
+				   &V473::Card::getPhases,
+				   (uint16_t*) rep);
 
 	 default:
 	    return ERR_BADPROP;
