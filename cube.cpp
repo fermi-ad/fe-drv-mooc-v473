@@ -240,14 +240,14 @@ STATUS v473_cube(V473::HANDLE const hw)
 		uint8_t const event = 0x0f;
 
 		hw->setTriggerMap(lock, ramp, &event, 1);
-
-		// Wait for the ramp to start to play. Then we can
-		// switch to updating the other ramp.
-
-		// while (hw->getActiveInterruptLevel(lock) == ramp)
-		taskDelay(4);
-		ramp = !ramp;
 	    }
+
+	    // Wait for the ramp to start to play. Then we can switch
+	    // to updating the other ramp.
+
+	    // while (hw->getActiveInterruptLevel(lock) == ramp)
+	    taskDelay(4);
+	    ramp = !ramp;
 	} while (true);
     }
     catch (std::exception const& e) {
