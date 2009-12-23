@@ -45,6 +45,33 @@ static STATUS objInit(short const oid, V473::Card* const ptr, void const*,
     return OK;
 }
 
+typedef bool (V473::Card::*STableCallback)(vwpp::Lock const&, uint16_t,
+					   uint16_t, uint16_t*, uint16_t);
+
+// Reading the simple tables and the maps are done practically the
+// same way. This function encapsulates the similarities.
+
+static STATUS readSimpleTable(RS_REQ const* req, size_t const entrySize,
+			      size_t const maxSize, V473::Card* const obj,
+			      STableCallback mt, uint16_t* const ptr)
+{
+    if (REQ_TO_453CHAN(req) >= 4)
+	return ERR_BADCHN;
+    if (req->ILEN % entrySize || req->ILEN >= maxSize)
+	return ERR_BADLEN;
+    if (req->OFFSET % entrySize || req->OFFSET >= maxSize - entrySize)
+	return ERR_BADOFF;
+    if (req->OFFSET + req->ILEN >= maxSize)
+	return ERR_BADOFLEN;
+
+    vwpp::Lock lock(obj->mutex);
+
+    if (!(obj->*mt)(lock, REQ_TO_453CHAN(req), req->OFFSET / entrySize,
+		    ptr, req->ILEN / entrySize))
+	return ERR_MISBOARD;
+    return OK;
+}
+
 static STATUS devReading(short const cls, RS_REQ const* const req,
 			 void* const rep, V473::Card* const* const ivs)
 {
@@ -64,19 +91,14 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 
 		 if (REQ_TO_453CHAN(req) >= 4)
 		     return ERR_BADCHN;
-		 if (length % 4 || length >= maxSize)
+		 if (length % entrySize || length >= maxSize)
 		     return ERR_BADLEN;
-		 if (offset % 4 || offset >= maxSize - entrySize)
+		 if (offset % entrySize || offset >= maxSize - entrySize)
 		     return ERR_BADOFF;
 		 if (offset + length >= maxSize)
 		     return ERR_BADOFLEN;
 
 		 static size_t const rampSize = 64 * entrySize;
-
-		 printf("Accepted request: chan %d, ramp %d, offset %d, len %d\n",
-			REQ_TO_CHAN(req), offset / rampSize + 1,
-			(offset % rampSize) / 4, length / 2);
-
 		 vwpp::Lock lock((*ivs)->mutex);
 
 		 if (!(*ivs)->getRamp(lock, REQ_TO_453CHAN(req),
@@ -87,7 +109,16 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 	     }
 	     break;
 
-	 case 3 ... 4:
+	 case 3:		// Delay Table
+	    return readSimpleTable(req, 2, 64, *ivs,
+				   &V473::Card::getDelays,
+				   (uint16_t*) rep);
+
+	 case 4:		// Offset Table
+	    return readSimpleTable(req, 2, 64, *ivs,
+				   &V473::Card::getOffsets,
+				   (uint16_t*) rep);
+
 	 case 9 ... 10:
 	     {
 	     }
@@ -98,7 +129,8 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 	}
 	return OK;
     }
-    catch (std::exception const&) {
+    catch (std::exception const& e) {
+	printf("V473 devReading() caught an exception: %s\n", e.what());
 	return ERR_DEVICEERROR;
     }
 }
