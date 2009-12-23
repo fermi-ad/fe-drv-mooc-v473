@@ -65,7 +65,7 @@ static STATUS readSimpleTable(RS_REQ const* req, size_t const entrySize,
     if (req->OFFSET + req->ILEN > maxSize)
 	return ERR_BADOFLEN;
 
-    vwpp::Lock lock(obj->mutex);
+    vwpp::Lock lock(obj->mutex, 100);
 
     if (!(obj->*mt)(lock, REQ_TO_453CHAN(req), req->OFFSET / entrySize,
 		    ptr, req->ILEN / entrySize))
@@ -85,8 +85,6 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 
 	 case 2:		// F(t) tables.
 	     {
-		 printf("accessing F(t) tables\n");
-
 		 static size_t const entrySize = 4;
 		 static size_t const maxSize = 15 * 64 * entrySize;
 		 size_t const length = req->ILEN;
@@ -101,18 +99,14 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 		 if (offset + length > maxSize)
 		     return ERR_BADOFLEN;
 
-		 printf("request validated: offset %d, length %d\n", offset, length);
-
 		 static size_t const rampSize = 64 * entrySize;
-		 vwpp::Lock lock((*ivs)->mutex, 1000);
+		 vwpp::Lock lock((*ivs)->mutex, 100);
 
 		 if (!(*ivs)->getRamp(lock, REQ_TO_453CHAN(req),
 				      offset / rampSize + 1,
 				      (offset % rampSize) / 4,
 				      (uint16_t*) rep, length / 2))
 		     return ERR_MISBOARD;
-
-		 printf("Data retrieved\n");
 	     }
 	     break;
 
@@ -153,7 +147,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 		 if (offset + length > maxSize)
 		     return ERR_BADOFLEN;
 
-		 vwpp::Lock lock((*ivs)->mutex);
+		 vwpp::Lock lock((*ivs)->mutex, 100);
 
 		 for (size_t ii = 0; length > 0 && ii < nTables; ++ii)
 		     if (offset < ii * tableSize) {
