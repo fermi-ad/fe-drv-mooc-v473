@@ -160,6 +160,10 @@ namespace V473 {
 	{
 	    if (offset >= 64)
 		throw std::logic_error("offset should be less than 64");
+
+	    printf("%s: chan %d, ramp %d, offset %d, ptr %p, n %d\n",
+		   __func__, chan, ramp, offset, ptr, n);
+
 	    return readBank(lock, chan, ChannelProperty(ramp << 7),
 			    2 * offset, ptr, n);
 	}
