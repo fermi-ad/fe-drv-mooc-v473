@@ -85,6 +85,8 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 
 	 case 2:		// F(t) tables.
 	     {
+		 printf("accessing F(t) tables\n");
+
 		 static size_t const entrySize = 4;
 		 static size_t const maxSize = 15 * 64 * entrySize;
 		 size_t const length = req->ILEN;
@@ -99,6 +101,8 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 		 if (offset + length > maxSize)
 		     return ERR_BADOFLEN;
 
+		 printf("request validated: offset %d, length %d\n", offset, length);
+
 		 static size_t const rampSize = 64 * entrySize;
 		 vwpp::Lock lock((*ivs)->mutex);
 
@@ -107,6 +111,8 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 				      (offset % rampSize) / 4,
 				      (uint16_t*) rep, length / 2))
 		     return ERR_MISBOARD;
+
+		 printf("Data retrieved\n");
 	     }
 	     break;
 
