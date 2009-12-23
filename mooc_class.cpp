@@ -3,7 +3,7 @@
 #include <vxWorks.h>
 #include <cstdio>
 #include <memory>
-#include <mooc++-4.0.h>
+#include <mooc++-4.1.h>
 #include "v473.h"
 
 typedef unsigned char chan_t;
@@ -185,7 +185,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 	return OK;
     }
     catch (std::exception const& e) {
-	printf("V473 devReading() caught an exception: %s\n", e.what());
+	printf("%s: exception '%s'\n", __func__, e.what());
 	return ERR_DEVICEERROR;
     }
 }
