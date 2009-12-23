@@ -104,7 +104,7 @@ static STATUS devReading(short const cls, RS_REQ const* const req,
 		 printf("request validated: offset %d, length %d\n", offset, length);
 
 		 static size_t const rampSize = 64 * entrySize;
-		 vwpp::Lock lock((*ivs)->mutex);
+		 vwpp::Lock lock((*ivs)->mutex, 1000);
 
 		 if (!(*ivs)->getRamp(lock, REQ_TO_453CHAN(req),
 				      offset / rampSize + 1,
