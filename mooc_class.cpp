@@ -23,6 +23,13 @@ typedef unsigned char type_t;
 #define REQ_TO_DELTA(req) ((req)->misc2 >> 12)
 #define REQ_TO_TOTAL(req) (((req)->misc2 >> 8) & 0xf)
 
+// Junk class. Some versions of GCC don't honor the
+// constructor/destructor attributes unless there's a C++ global
+// object needing to be created/destroyed. This small section creates
+// an unused object to make sure these functions are called.
+
+namespace v473 { class Junk {} junk; };
+
 // Local prototypes...
 
 static void term(void) __attribute__((destructor));
