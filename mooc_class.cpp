@@ -437,6 +437,18 @@ static STATUS devSetting(short, RS_REQ* req, void*,
     }
 }
 
+static STATUS devBasicControl(short, RS_REQ const* const req, void*,
+			      V473::Card* const* const obj)
+{
+    return NOERR;
+}
+
+static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
+			     V473::Card* const* const obj)
+{
+    return NOERR;
+}
+
 // Creates an instance of the MOOC V473 class.
 
 STATUS v473_create_mooc_instance(unsigned short const oid,
@@ -473,7 +485,7 @@ STATUS v473_create_mooc_class(uint8_t cls)
 	return ERROR;
     }
 
-    if (NOERR != create_class(cls, 0, 0, 4, sizeof(V473::Card*))) {
+    if (NOERR != create_class(cls, 0, 0, 6, sizeof(V473::Card*))) {
 	printf("Error returned from create_class()!\n");
 	return ERROR;
     }
@@ -495,6 +507,14 @@ STATUS v473_create_mooc_class(uint8_t cls)
     }
     if (NOERR != add_class_msg(cls, sPRSET, (PMETHOD) devSetting)) {
 	printf("Error trying to add the setting handler.\n");
+	return ERROR;
+    }
+    if (NOERR != add_class_msg(cls, rPRBSTS, (PMETHOD) devBasicStatus)) {
+	printf("Error trying to add the basic status handler.\n");
+	return ERROR;
+    }
+    if (NOERR != add_class_msg(cls, sPRBCTL, (PMETHOD) devBasicControl)) {
+	printf("Error trying to add the basic control handler.\n");
 	return ERROR;
     }
 
