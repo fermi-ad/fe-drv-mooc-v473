@@ -186,6 +186,9 @@ namespace V473 {
 	    return readBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
 	}
 
+	bool getDAC(vwpp::Lock const&, uint16_t, uint16_t*);
+	bool setDAC(vwpp::Lock const&, uint16_t, uint16_t);
+
 	bool setDelays(vwpp::Lock const& lock, uint16_t const chan,
 		       uint16_t const intLvl, uint16_t const* const ptr,
 		       uint16_t const n)

@@ -273,6 +273,23 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
 	throw std::logic_error("# of TCLK events cannot exceed 8");
 }
 
+bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
+		  uint16_t* const ptr)
+{
+    if (readProperty(lock, GEN_ADDR(chan, cpDACReadWrite), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
+		  uint16_t const val)
+{
+    sysOut16(dataBuffer, val);
+    return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), sizeof(val));
+}
+
 bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
 {
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
