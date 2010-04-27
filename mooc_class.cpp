@@ -440,13 +440,75 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 			      V473::Card* const* const obj)
 {
-    return NOERR;
+    try {
+	switch (REQ_TO_SUBCODE(req)) {
+	 case 9:
+	 case 10:
+	     {
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+		 size_t const chan = REQ_TO_453CHAN(req);
+
+		 if (chan >= 4)
+		     return ERR_BADCHN;
+		 if (length > sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 return (*obj)->setSineWaveMode(lock, chan, DATAS(req)) ?
+		     NOERR : ERR_MISBOARD;
+	     }
+	     break;
+
+	 default:
+	    return ERR_BADPROP;
+	}
+	return NOERR;
+    }
+    catch (std::exception const& e) {
+	printf("%s: exception '%s'\n", __func__, e.what());
+	return ERR_DEVICEERROR;
+    }
 }
 
 static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 			     V473::Card* const* const obj)
 {
-    return NOERR;
+    try {
+	switch (REQ_TO_SUBCODE(req)) {
+	 case 9:
+	 case 10:
+	     {
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+		 size_t const chan = REQ_TO_453CHAN(req);
+
+		 if (chan >= 4)
+		     return ERR_BADCHN;
+		 if (length > sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 return (*obj)->getSineWaveMode(lock, chan, (uint16_t*) rep) ?
+		     NOERR : ERR_MISBOARD;
+	     }
+	     break;
+
+	 default:
+	    return ERR_BADPROP;
+	}
+	return NOERR;
+    }
+    catch (std::exception const& e) {
+	printf("%s: exception '%s'\n", __func__, e.what());
+	return ERR_DEVICEERROR;
+    }
 }
 
 // Creates an instance of the MOOC V473 class.

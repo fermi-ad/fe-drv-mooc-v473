@@ -290,6 +290,23 @@ bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
     return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), sizeof(val));
 }
 
+bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
+			   uint16_t* const ptr)
+{
+    if (readProperty(lock, GEN_ADDR(chan, cpSineWaveMode), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer) & 7;
+	return true;
+    } else
+	return false;
+}
+
+bool Card::setSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
+			   uint16_t const val)
+{
+    sysOut16(dataBuffer, val & 7);
+    return setProperty(lock, GEN_ADDR(chan, cpSineWaveMode), sizeof(val));
+}
+
 bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
 {
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
