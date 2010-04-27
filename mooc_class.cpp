@@ -309,6 +309,34 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 	     }
 	     return NOERR;
 
+	 case 2:		// F(t) tables.
+	     {
+		 static size_t const entrySize = 4;
+		 static size_t const maxSize = 15 * 64 * entrySize;
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+
+		 if (REQ_TO_453CHAN(req) >= 4)
+		     return ERR_BADCHN;
+		 if (length % entrySize || length > maxSize)
+		     return ERR_BADLEN;
+		 if (offset % entrySize || offset > maxSize - entrySize)
+		     return ERR_BADOFF;
+		 if (offset + length > maxSize)
+		     return ERR_BADOFLEN;
+
+		 static size_t const rampSize = 64 * entrySize;
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 if (!(*obj)->setRamp(lock, REQ_TO_453CHAN(req),
+				      offset / rampSize + 1,
+				      (offset % rampSize) / 4,
+				      (uint16_t const*) req->data,
+				      length / 2))
+		     return ERR_MISBOARD;
+	     }
+	     break;
+
 	 case 3:		// Delay Table
 	    return writeSimpleTable(req, 2, 64, *obj,
 				    &V473::Card::setDelays,
