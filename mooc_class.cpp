@@ -473,7 +473,7 @@ STATUS v473_create_mooc_class(uint8_t cls)
 	return ERROR;
     }
 
-    if (NOERR != create_class(cls, 0, 0, 3, sizeof(V473::Card*))) {
+    if (NOERR != create_class(cls, 0, 0, 4, sizeof(V473::Card*))) {
 	printf("Error returned from create_class()!\n");
 	return ERROR;
     }
