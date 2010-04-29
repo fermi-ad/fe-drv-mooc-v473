@@ -273,6 +273,69 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
 	throw std::logic_error("# of TCLK events cannot exceed 8");
 }
 
+bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpModuleID), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpFirmwareVersion), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpActiveRampTable), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpActiveScaleFactor), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpActiveRampTableSegment), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpActiveInterruptLevel), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
+{
+    if (readProperty(lock, GEN_ADDR(0, cpLastTclkEvent), sizeof(*ptr))) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
 bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 		  uint16_t* const ptr)
 {

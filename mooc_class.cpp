@@ -109,11 +109,107 @@ static STATUS writeSimpleTable(RS_REQ const* const req, size_t const entrySize,
     return NOERR;
 }
 
+#define BUMP(l,o,p,s)	{ (l) -= (s); (o) += (s); \
+	(p) = (void*)((char*) (p) + (s)); }
+
+static STATUS readVersionDevice(RS_REQ const* const req, void* rep,
+				V473::Card* const* const obj)
+{
+    static size_t const entrySize = 2;
+    static size_t const maxSize = 42 * entrySize;
+    size_t length = req->ILEN;
+    size_t offset = req->OFFSET;
+
+    if (!length || length % entrySize || length > maxSize)
+	return ERR_BADLEN;
+    if (offset % entrySize || offset > maxSize - entrySize)
+	return ERR_BADOFF;
+    if (offset + length > maxSize)
+	return ERR_BADOFLEN;
+
+    vwpp::Lock lock((*obj)->mutex, 100);
+
+    if (offset == 0) {
+	if (!(*obj)->getFirmwareVersion(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 2 && length >= 2) {
+	if (!(*obj)->getActiveRamp(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 4 && length >= 2) {
+	if (!(*obj)->getActiveScaleFactor(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 6 && length >= 2) {
+	size_t const amount = length > 8 ? 8 : length;
+
+	memset(rep, amount, 0);
+	BUMP(length, offset, rep, amount);
+    }
+
+    if (offset == 14 && length >= 2) {
+	if (!(*obj)->getCurrentSegment(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 16 && length >= 2) {
+	size_t const amount = length > 8 ? 8 : length;
+
+	memset(rep, amount, 0);
+	BUMP(length, offset, rep, amount);
+    }
+
+    if (offset == 24 && length >= 2) {
+	if (!(*obj)->getModuleId(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 26 && length >= 2) {
+	size_t const amount = length > 42 ? 42 : length;
+
+	memset(rep, amount, 0);
+	BUMP(length, offset, rep, amount);
+    }
+
+    if (offset == 68 && length >= 2) {
+	if (!(*obj)->getCurrentIntLvl(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 70 && length >= 2) {
+	if (!(*obj)->getLastTclkEvent(lock, (uint16_t*) rep))
+	    return ERR_MISBOARD;
+	BUMP(length, offset, rep, 2);
+    }
+
+    if (offset == 72 && length >= 2) {
+	size_t const amount = length > 12 ? 12 : length;
+
+	memset(rep, amount, 0);
+	BUMP(length, offset, rep, amount);
+    }
+
+    return NOERR;
+}
+
 static STATUS devReading(short, RS_REQ const* const req, void* const rep,
 			 V473::Card* const* const ivs)
 {
     try {
 	switch (REQ_TO_SUBCODE(req)) {
+	 case 7:
+	    return readVersionDevice(req, rep, ivs);
+
 	 case 1:		// G(i) tables. We dont have these, so fake it.
 	 case 2:		// F(t) tables.
 	 case 3:		// Delay Table
@@ -244,6 +340,9 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 	    return readSimpleTable(req, 2, 64, *ivs,
 				   &V473::Card::getScaleFactors,
 				   (uint16_t*) rep);
+
+	 case 7:
+	    return readVersionDevice(req, rep, ivs);
 
 	 case 8:
 	     {

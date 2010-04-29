@@ -44,7 +44,9 @@ namespace V473 {
 	    cpActiveOffset = 0xa32, cpActiveRampTableSegment = 0xa33,
 	    cpTimeRemaining = 0xa34, cpActiveSineWaveFreq = 0xa35,
 	    cpActiveSiveWavePhase = 0xa36, cpFinalSineSaveFreq = 0xa37,
-	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39
+	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39,
+	    cpActiveInterruptLevel = 0x4210, cpLastTclkEvent = 0x4211,
+	    cpModuleID = 0xff00, cpFirmwareVersion = 0xff01
 	};
 
 	enum SineMode {
@@ -185,6 +187,14 @@ namespace V473 {
 	{
 	    return readBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
 	}
+
+	bool getModuleId(vwpp::Lock const&, uint16_t*);
+	bool getFirmwareVersion(vwpp::Lock const&, uint16_t*);
+	bool getActiveRamp(vwpp::Lock const&, uint16_t*);
+	bool getActiveScaleFactor(vwpp::Lock const&, uint16_t*);
+	bool getCurrentSegment(vwpp::Lock const&, uint16_t*);
+	bool getCurrentIntLvl(vwpp::Lock const&, uint16_t*);
+	bool getLastTclkEvent(vwpp::Lock const&, uint16_t*);
 
 	bool getDAC(vwpp::Lock const&, uint16_t, uint16_t*);
 	bool setDAC(vwpp::Lock const&, uint16_t, uint16_t);
