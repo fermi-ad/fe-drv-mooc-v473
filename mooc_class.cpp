@@ -495,6 +495,22 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 				    &V473::Card::setScaleFactors,
 				    (uint16_t const*) req->data);
 
+	 case 7:
+	     {
+		 static size_t const entrySize = 2;
+		 static size_t const maxSize = 84;
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+
+		 if (length % entrySize || length > maxSize)
+		     return ERR_BADLEN;
+		 if (offset % entrySize || offset > maxSize - entrySize)
+		     return ERR_BADOFF;
+		 if (offset + length > maxSize)
+		     return ERR_BADOFLEN;
+	     }
+	     return NOERR;
+
 	 case 8:
 	     {
 		 size_t const length = req->ILEN;
