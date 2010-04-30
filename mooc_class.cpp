@@ -588,6 +588,28 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 	     }
 	     break;
 
+	 case 11:
+	     {
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+
+		 if (length != sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 uint16_t const val = DATAS(req);
+
+		 if (val != 1 && val != 2)
+		     return NOERR;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 return (*obj)->setTclkInterruptEnable(lock, val == 2) ?
+		     NOERR : ERR_MISBOARD;
+	     }
+	     break;
+
 	 default:
 	    return ERR_BADPROP;
 	}

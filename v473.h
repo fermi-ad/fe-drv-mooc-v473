@@ -47,7 +47,7 @@ namespace V473 {
 	    cpTimeRemaining = 0xa34, cpActiveSineWaveFreq = 0xa35,
 	    cpActiveSiveWavePhase = 0xa36, cpFinalSineSaveFreq = 0xa37,
 	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39,
-	    cpTriggerMap = 0x4000,
+	    cpTriggerMap = 0x4000, cpTclkInterruptEnable = 0x4200,
 	    cpActiveInterruptLevel = 0x4210, cpLastTclkEvent = 0x4211,
 	    cpModuleID = 0xff00, cpFirmwareVersion = 0xff01
 	};
@@ -216,7 +216,7 @@ namespace V473 {
 
 	bool getSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t*);
 	bool setSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t);
-
+	bool setTclkInterruptEnable(vwpp::Lock const&, bool);
 	bool setDelays(vwpp::Lock const& lock, uint16_t const chan,
 		       uint16_t const intLvl, uint16_t const* const ptr,
 		       uint16_t const n)

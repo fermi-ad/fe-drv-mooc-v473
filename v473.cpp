@@ -376,6 +376,12 @@ bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
     return setProperty(lock, (ChannelProperty) 0x4200, 1);
 }
 
+bool Card::setTclkInterruptEnable(vwpp::Lock const& lock, bool const val)
+{
+    sysOut16(dataBuffer, val);
+    return setProperty(lock, GEN_ADDR(0, cpTclkInterruptEnable), sizeof(val));
+}
+
 V473::HANDLE v473_create(int addr, int intVec)
 {
     try {
