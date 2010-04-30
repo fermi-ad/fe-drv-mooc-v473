@@ -661,6 +661,24 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 	     }
 	     break;
 
+	 case 11:
+	     {
+		 if (length != sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+		 bool val;
+
+		 if ((*obj)->getTclkInterruptEnable(lock, &val)) {
+		     *(uint16_t*)rep = val;
+		     return NOERR;
+		 } else
+		     return ERR_MISBOARD;
+	     }
+	     break;
+
 	 default:
 	    return ERR_BADPROP;
 	}

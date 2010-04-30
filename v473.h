@@ -210,7 +210,7 @@ namespace V473 {
 	bool getCurrentSegment(vwpp::Lock const&, uint16_t*);
 	bool getCurrentIntLvl(vwpp::Lock const&, uint16_t*);
 	bool getLastTclkEvent(vwpp::Lock const&, uint16_t*);
-
+	bool getTclkInterruptEnable(vwpp::Lock const&, bool*);
 	bool getDAC(vwpp::Lock const&, uint16_t, uint16_t*);
 	bool setDAC(vwpp::Lock const&, uint16_t, uint16_t);
 
