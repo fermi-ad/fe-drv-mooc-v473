@@ -376,19 +376,13 @@ bool Card::setSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 			   uint16_t const val)
 {
     sysOut16(dataBuffer, val & 7);
-    return setProperty(lock, GEN_ADDR(chan, cpSineWaveMode), sizeof(val));
+    return setProperty(lock, GEN_ADDR(chan, cpSineWaveMode), 1);
 }
 
 bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
 {
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
-    return setProperty(lock, (ChannelProperty) 0x4200, 1);
-}
-
-bool Card::setTclkInterruptEnable(vwpp::Lock const& lock, bool const val)
-{
-    sysOut16(dataBuffer, val);
-    return setProperty(lock, GEN_ADDR(0, cpTclkInterruptEnable), sizeof(val));
+    return setProperty(lock, cpTclkInterruptEnable, 1);
 }
 
 V473::HANDLE v473_create(int addr, int intVec)

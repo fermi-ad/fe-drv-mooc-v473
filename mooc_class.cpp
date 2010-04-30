@@ -605,7 +605,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
-		 return (*obj)->setTclkInterruptEnable(lock, val == 2) ?
+		 return (*obj)->tclkTrigEnable(lock, val == 2) ?
 		     NOERR : ERR_MISBOARD;
 	     }
 	     break;

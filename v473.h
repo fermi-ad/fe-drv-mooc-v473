@@ -216,7 +216,6 @@ namespace V473 {
 
 	bool getSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t*);
 	bool setSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t);
-	bool setTclkInterruptEnable(vwpp::Lock const&, bool);
 	bool setDelays(vwpp::Lock const& lock, uint16_t const chan,
 		       uint16_t const intLvl, uint16_t const* const ptr,
 		       uint16_t const n)
