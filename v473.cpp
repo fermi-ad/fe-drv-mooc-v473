@@ -359,7 +359,7 @@ bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
 		  uint16_t const val)
 {
     sysOut16(dataBuffer, val);
-    return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), sizeof(val));
+    return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), 1);
 }
 
 bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
@@ -383,6 +383,23 @@ bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
 {
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
     return setProperty(lock, cpTclkInterruptEnable, 1);
+}
+
+bool Card::enablePowerSupply(vwpp::Lock const& lock, uint16_t const chan,
+			     bool const en)
+{
+    sysOut16(dataBuffer, static_cast<uint16_t>(en));
+    return setProperty(lock, cpPowerSupplyEnable, 1);
+}
+
+bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
+{
+    sysOut16(dataBuffer, 1);
+    if (setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1)) {
+	sysOut16(dataBuffer, 0);
+	return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1);
+    } else
+	return false;
 }
 
 V473::HANDLE v473_create(int addr, int intVec)
