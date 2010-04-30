@@ -275,7 +275,7 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
 
 bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpModuleID), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpModuleID), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -284,7 +284,7 @@ bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
 
 bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpFirmwareVersion), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpFirmwareVersion), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -293,7 +293,7 @@ bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 
 bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpActiveRampTable), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpActiveRampTable), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -302,7 +302,7 @@ bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
 
 bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpActiveScaleFactor), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpActiveScaleFactor), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -311,7 +311,7 @@ bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
 
 bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpActiveRampTableSegment), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpActiveRampTableSegment), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -320,7 +320,7 @@ bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
 
 bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpActiveInterruptLevel), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpActiveInterruptLevel), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -329,7 +329,7 @@ bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
 
 bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpLastTclkEvent), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpLastTclkEvent), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -339,7 +339,7 @@ bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
 bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 		  uint16_t* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(chan, cpDACReadWrite), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(chan, cpDACReadWrite), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
     } else
@@ -348,7 +348,7 @@ bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 
 bool Card::getTclkInterruptEnable(vwpp::Lock const& lock, bool* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(0, cpTclkInterruptEnable), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(0, cpTclkInterruptEnable), 1)) {
 	*ptr = (bool) sysIn16(dataBuffer);
 	return true;
     } else
@@ -365,7 +365,7 @@ bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
 bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 			   uint16_t* const ptr)
 {
-    if (readProperty(lock, GEN_ADDR(chan, cpSineWaveMode), sizeof(*ptr))) {
+    if (readProperty(lock, GEN_ADDR(chan, cpSineWaveMode), 1)) {
 	*ptr = sysIn16(dataBuffer) & 7;
 	return true;
     } else
