@@ -566,7 +566,43 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 			      V473::Card* const* const obj)
 {
     try {
+	bool result = true;
+
 	switch (REQ_TO_SUBCODE(req)) {
+	 case 8:
+	     {
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+		 size_t const chan = REQ_TO_453CHAN(req);
+
+		 if (chan >= 4)
+		     return ERR_BADCHN;
+		 if (length != sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 switch (DATAS(req)) {
+		  case 1:
+		     result = (*obj)->enablePowerSupply(lock, chan, false);
+		     break;
+
+		  case 2:
+		     result = (*obj)->enablePowerSupply(lock, chan, true);
+		     break;
+
+		  case 3:
+		     result = (*obj)->resetPowerSupply(lock, chan);
+		     break;
+
+		  default:
+		     return ERR_WRBASCON;
+		 }
+	     }
+	     break;
+
 	 case 9:
 	 case 10:
 	     {
@@ -583,8 +619,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
-		 return (*obj)->setSineWaveMode(lock, chan, DATAS(req)) ?
-		     NOERR : ERR_MISBOARD;
+		 result = (*obj)->setSineWaveMode(lock, chan, DATAS(req));
 	     }
 	     break;
 
@@ -605,15 +640,14 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
-		 return (*obj)->tclkTrigEnable(lock, val == 2) ?
-		     NOERR : ERR_MISBOARD;
+		 result = (*obj)->tclkTrigEnable(lock, val == 2);
 	     }
 	     break;
 
 	 default:
 	    return ERR_BADPROP;
 	}
-	return NOERR;
+	return result ? NOERR : ERR_MISBOARD;
     }
     catch (std::exception const& e) {
 	printf("%s: exception '%s'\n", __func__, e.what());
