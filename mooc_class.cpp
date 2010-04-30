@@ -374,6 +374,11 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 				   &V473::Card::getPhases,
 				   (uint16_t*) rep);
 
+	 case 11:
+	    return readSimpleTable(req, 2, 512, *ivs,
+				   &V473::Card::getTriggerMap,
+				   (uint16_t*) rep);
+
 	 default:
 	    return ERR_BADPROP;
 	}
@@ -541,6 +546,11 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 				    &V473::Card::setPhases,
 				    (uint16_t const*) req->data);
 
+	 case 11:		// Trigger map
+	    return writeSimpleTable(req, 2, 512, *obj,
+				    &V473::Card::setTriggerMap,
+				    (uint16_t const*) req->data);
+
 	 default:
 	    return ERR_BADPROP;
 	}
@@ -592,13 +602,27 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 			     V473::Card* const* const obj)
 {
+    size_t const length = req->ILEN;
+    size_t const offset = req->OFFSET;
+ 
     try {
 	switch (REQ_TO_SUBCODE(req)) {
+	 case 8:
+	     {
+		 if (length != 2 * sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 ((uint16_t*)rep)[0] = (*obj)->getIrqSource();
+		 ((uint16_t*)rep)[1] = 0;
+		 return NOERR;
+	     }
+	     break;
+
 	 case 9:
 	 case 10:
 	     {
-		 size_t const length = req->ILEN;
-		 size_t const offset = req->OFFSET;
 		 size_t const chan = REQ_TO_453CHAN(req);
 
 		 if (chan >= 4)

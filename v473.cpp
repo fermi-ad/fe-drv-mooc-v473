@@ -159,7 +159,7 @@ void Card::intHandler()
 {
     sysOut16(irqSource, 0x1000);
 
-    uint16_t const sts = sysIn16(irqSource);
+    uint16_t const sts = prevIrqSource = sysIn16(irqSource);
 
     if (sts & 0x8000)
 	handleCommandErr();

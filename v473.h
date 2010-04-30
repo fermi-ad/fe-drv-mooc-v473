@@ -22,6 +22,8 @@ namespace V473 {
 	uint16_t* irqMask;
 	uint16_t* irqStatus;
 
+	uint16_t prevIrqSource;
+
 	// No copying!
 
 	Card();
@@ -45,6 +47,7 @@ namespace V473 {
 	    cpTimeRemaining = 0xa34, cpActiveSineWaveFreq = 0xa35,
 	    cpActiveSiveWavePhase = 0xa36, cpFinalSineSaveFreq = 0xa37,
 	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39,
+	    cpTriggerMap = 0x4000,
 	    cpActiveInterruptLevel = 0x4210, cpLastTclkEvent = 0x4211,
 	    cpModuleID = 0xff00, cpFirmwareVersion = 0xff01
 	};
@@ -63,7 +66,10 @@ namespace V473 {
 	{
 	    if (chan >= 4)
 		throw std::logic_error("channel out of range");
-	    if (intLvl >= 32)
+	    if (prop == cpTriggerMap) {
+		if (intLvl >= 256)
+		    throw std::logic_error("interrupt level out of range");
+	    } else if (intLvl >= 32)
 		throw std::logic_error("interrupt level out of range");
 	    return 0x1000 * chan + prop + intLvl;
 	}
@@ -188,6 +194,15 @@ namespace V473 {
 	    return readBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
 	}
 
+	bool getTriggerMap(vwpp::Lock const& lock, uint16_t,
+			     uint16_t const intLvl, uint16_t* const ptr,
+			     uint16_t const n)
+	{
+	    return readBank(lock, 0, cpTriggerMap, intLvl, ptr, n);
+	}
+
+	uint16_t getIrqSource() const { return prevIrqSource; }
+
 	bool getModuleId(vwpp::Lock const&, uint16_t*);
 	bool getFirmwareVersion(vwpp::Lock const&, uint16_t*);
 	bool getActiveRamp(vwpp::Lock const&, uint16_t*);
@@ -273,6 +288,13 @@ namespace V473 {
 			       uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpScaleFactorMap, intLvl, ptr, n);
+	}
+
+	bool setTriggerMap(vwpp::Lock const& lock, uint16_t,
+			   uint16_t const intLvl, uint16_t const* const ptr,
+			   uint16_t const n)
+	{
+	    return writeBank(lock, 0, cpTriggerMap, intLvl, ptr, n);
 	}
 
 	bool setScaleFactors(vwpp::Lock const& lock, uint16_t const chan,
