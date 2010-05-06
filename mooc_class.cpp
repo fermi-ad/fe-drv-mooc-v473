@@ -219,7 +219,7 @@ static STATUS devReading(short, RS_REQ const* const req, void* const rep,
 	 case 9:		// Frequency Table
 	 case 10:		// Phase Table
 	 default:
-	    return ERR_BADPROP;
+	    return ERR_UNSUPMT;
 	}
 	return NOERR;
     }
@@ -380,7 +380,7 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 				   (uint16_t*) rep);
 
 	 default:
-	    return ERR_BADPROP;
+	    return ERR_UNSUPMT;
 	}
 	return NOERR;
     }
@@ -552,7 +552,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 				    (uint16_t const*) req->data);
 
 	 default:
-	    return ERR_BADPROP;
+	    return ERR_UNSUPMT;
 	}
 	return NOERR;
     }
@@ -645,7 +645,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 	     break;
 
 	 default:
-	    return ERR_BADPROP;
+	    return ERR_UNSUPMT;
 	}
 	return result ? NOERR : ERR_MISBOARD;
     }
@@ -714,7 +714,7 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 	     break;
 
 	 default:
-	    return ERR_BADPROP;
+	    return ERR_UNSUPMT;
 	}
 	return NOERR;
     }
