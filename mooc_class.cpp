@@ -88,8 +88,8 @@ static STATUS readSimpleTable(RS_REQ const* const req, size_t const entrySize,
 }
 
 static STATUS writeSimpleTable(RS_REQ const* const req, size_t const entrySize,
-			      size_t const maxSize, V473::Card* const obj,
-			      STableWriteCallback mt,
+			       size_t const maxSize, V473::Card* const obj,
+			       STableWriteCallback mt,
 			       uint16_t const* const ptr)
 {
     if (REQ_TO_453CHAN(req) >= 4)
