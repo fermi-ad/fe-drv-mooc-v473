@@ -547,9 +547,37 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 				    (uint16_t const*) req->data);
 
 	 case 11:		// Trigger map
-	    return writeSimpleTable(req, 2, 512, *obj,
-				    &V473::Card::setTriggerMap,
-				    (uint16_t const*) req->data);
+	     {
+		 if (REQ_TO_453CHAN(req) != 0)
+		     return ERR_BADCHN;
+		 if (req->ILEN % 2 || req->ILEN > 512)
+		     return ERR_BADLEN;
+		 if (req->OFFSET % 2 || req->OFFSET > 512 - 2)
+		     return ERR_BADOFF;
+		 if (req->OFFSET + req->ILEN > 512)
+		     return ERR_BADOFLEN;
+
+		 uint16_t curr[256];
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 if (!(*obj)->getTriggerMap(lock, 0, 0, curr, 512))
+		     return ERR_MISBOARD;
+
+		 for (size_t ii = 0; ii < req->ILEN; ii += 2) {
+		     uint16_t const val =
+			 *(uint16_t const*)((uint8_t const*)req->data + ii) & 0xff;
+
+		     for (size_t jj = 0; jj < 256; ++jj)
+			 if (val == (curr[jj] & 0xff))
+			     return ERR_BADSET;
+		 }
+
+		 if (!(*obj)->setTriggerMap(lock, 0, req->OFFSET / 2,
+					    (uint16_t const*) req->data,
+					    req->ILEN / 2))
+		     return ERR_MISBOARD;
+		 return NOERR;
+	     }
 
 	 default:
 	    return ERR_UNSUPMT;
