@@ -237,8 +237,10 @@ STATUS v473_cube(V473::HANDLE const hw)
 		// Hand the $0f event to the interrupt assigned to the
 		// next ramp.
 
+		uint8_t const unevent = 0xfe;
 		uint8_t const event = 0x0f;
 
+		hw->setTriggerMap(lock, !ramp, &unevent, 1);
 		hw->setTriggerMap(lock, ramp, &event, 1);
 	    }
 
