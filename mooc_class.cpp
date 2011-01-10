@@ -560,7 +560,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		 uint16_t curr[256];
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
-		 if (!(*obj)->getTriggerMap(lock, 0, 0, curr, 512))
+		 if (!(*obj)->getTriggerMap(lock, 0, 0, curr, 256))
 		     return ERR_MISBOARD;
 
 		 for (size_t ii = 0; ii < req->ILEN; ii += 2) {
