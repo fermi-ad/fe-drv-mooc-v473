@@ -204,6 +204,9 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     sysOut16(mailbox, mb);
     sysOut16(count, (uint16_t) n);
     sysOut16(readWrite, 0);
+
+    // Wait up to 40 milliseconds for a response.
+
     return intDone.wait(40);
 }
 
@@ -252,6 +255,8 @@ bool Card::writeBank(vwpp::Lock const& lock, uint16_t const chan,
     } else if (start >= 32)
 	    throw std::logic_error("interrupt level out of range");
 
+    assert(sysIn16(readWrite) & 2);
+
     for (uint16_t ii = 0; ii < n; ++ii)
 	sysOut16(dataBuffer + ii, ptr[ii]);
     return setProperty(lock, GEN_ADDR(chan, prop, start), n);
@@ -261,6 +266,8 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
 			 uint8_t const events[8], size_t const n)
 {
     if (n <= 8) {
+	assert(sysIn16(readWrite) & 2);
+
 	for (size_t ii = 0; ii < 8; ++ii) {
 	    sysOut16(dataBuffer, ii < n ? events[ii] : 0x00fe);
 	    if (!setProperty(lock, 0x4000 + (intLvl << 3) + ii, 1))
@@ -274,6 +281,7 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
 bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpModuleID), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -284,6 +292,7 @@ bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
 bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpFirmwareVersion), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -294,6 +303,7 @@ bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpActiveRampTable), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -304,6 +314,7 @@ bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
 bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpActiveScaleFactor), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -314,6 +325,7 @@ bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
 bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpActiveRampTableSegment), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -324,6 +336,7 @@ bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
 bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpActiveInterruptLevel), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -334,6 +347,7 @@ bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
 bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpLastTclkEvent), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -345,6 +359,7 @@ bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 		  uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(chan, cpDACReadWrite), 1)) {
 	*ptr = sysIn16(dataBuffer);
 	return true;
@@ -355,6 +370,7 @@ bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 bool Card::getTclkInterruptEnable(vwpp::Lock const& lock, bool* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(0, cpTclkInterruptEnable), 1)) {
 	*ptr = (bool) sysIn16(dataBuffer);
 	return true;
@@ -365,6 +381,8 @@ bool Card::getTclkInterruptEnable(vwpp::Lock const& lock, bool* const ptr)
 bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
 		  uint16_t const val)
 {
+    assert(sysIn16(readWrite) & 2);
+
     sysOut16(dataBuffer, val);
     return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), 1);
 }
@@ -373,6 +391,7 @@ bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 			   uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
+
     if (readProperty(lock, GEN_ADDR(chan, cpSineWaveMode), 1)) {
 	*ptr = sysIn16(dataBuffer) & 7;
 	return true;
@@ -383,12 +402,16 @@ bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 bool Card::setSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 			   uint16_t const val)
 {
+    assert(sysIn16(readWrite) & 2);
+
     sysOut16(dataBuffer, val & 7);
     return setProperty(lock, GEN_ADDR(chan, cpSineWaveMode), 1);
 }
 
 bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
 {
+    assert(sysIn16(readWrite) & 2);
+
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
     return setProperty(lock, cpTclkInterruptEnable, 1);
 }
@@ -396,14 +419,20 @@ bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
 bool Card::enablePowerSupply(vwpp::Lock const& lock, uint16_t const chan,
 			     bool const en)
 {
+    assert(sysIn16(readWrite) & 2);
+
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
     return setProperty(lock, cpPowerSupplyEnable, 1);
 }
 
 bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
 {
+    assert(sysIn16(readWrite) & 2);
+
     sysOut16(dataBuffer, 1);
     if (setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1)) {
+	assert(sysIn16(readWrite) & 2);
+
 	sysOut16(dataBuffer, 0);
 	return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1);
     } else
