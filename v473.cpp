@@ -2,6 +2,7 @@
 
 #include "v473.h"
 #include <errlogLib-2.0.h>
+#include <ssmlite-1.0.h>
 #include <vme.h>
 #include <sysLib.h>
 #include <iv.h>
@@ -158,35 +159,59 @@ uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
 
 void Card::intHandler()
 {
+    ssmBaseAddr->led[16] = Green;
     sysOut16(irqSource, 0x1000);
 
     uint16_t const sts = prevIrqSource = sysIn16(irqSource);
 
-    if (sts & 0x8000)
+    if (sts & 0x8000) {
+	ssmBaseAddr->led[17] = Green;
 	handleCommandErr();
-    if (sts & 0x4000)
+	ssmBaseAddr->led[17] = Black;
+    }
+    if (sts & 0x4000) {
+	ssmBaseAddr->led[18] = Green;
 	handleCalculationErr();
-    if (sts & 0x1000)
+	ssmBaseAddr->led[18] = Black;
+    }
+    if (sts & 0x1000) {
+	ssmBaseAddr->led[19] = Green;
 	handleMissingTCLK();
-    if (sts & 0x200)
+	ssmBaseAddr->led[19] = Black;
+    }
+    if (sts & 0x200) {
+	ssmBaseAddr->led[20] = Green;
 	handlePSTrackingErr();
-    if (sts & 0x10)
+	ssmBaseAddr->led[20] = Black;
+    }
+    if (sts & 0x10) {
+	ssmBaseAddr->led[21] = Green;
 	intDone.wakeOne();
-    if (sts & 0x8)
+	ssmBaseAddr->led[21] = Black;
+    }
+    if (sts & 0x8) {
+	ssmBaseAddr->led[22] = Green;
 	handlePS3Err();
-    if (sts & 0x4)
+	ssmBaseAddr->led[22] = Black;
+    }
+    if (sts & 0x4) {
+	ssmBaseAddr->led[23] = Green;
 	handlePS2Err();
-    if (sts & 0x2)
+	ssmBaseAddr->led[23] = Black;
+    }
+    if (sts & 0x2) {
+	ssmBaseAddr->led[24] = Green;
 	handlePS1Err();
-    if (sts & 0x1)
+	ssmBaseAddr->led[24] = Black;
+    }
+    if (sts & 0x1) {
+	ssmBaseAddr->led[25] = Green;
 	handlePS0Err();
+	ssmBaseAddr->led[25] = Black;
+    }
 
     sysOut16(irqSource, sts);
-
-#if 0
-    while (uint16_t const diff = (sts & sysIn16(irqSource)) & ~0x1000)
-	sysOut16(irqSource, diff);
-#endif
+    ssmBaseAddr->led[16] = Black;
 }
 
 void Card::generateInterrupts(bool flg)
