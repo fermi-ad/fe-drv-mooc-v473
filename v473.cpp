@@ -245,6 +245,9 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     sysOut16(count, (uint16_t) n);
     sysOut16(readWrite, 1);
 
+    ssmBaseAddr->led[16] = Yellow;
+    ssmBaseAddr->led[16] = Black;
+
     // Wait up to 40 milliseconds for a response.
 
     return intDone.wait(40);
