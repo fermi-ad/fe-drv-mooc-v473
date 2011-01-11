@@ -19,6 +19,9 @@ static void init() __attribute__((constructor));
 static void term() __attribute__((destructor));
 
 static HLOG hLog = 0;
+static uint16_t lastMb = 0;
+static uint16_t lastCount = 0;
+static uint16_t lastDir = 0;
 
 // Constructor function sets up the logger handle.
 
@@ -114,7 +117,8 @@ void Card::gblIntHandler(Card* const ptr)
 
 void Card::handleCommandErr()
 {
-    logInform1(hLog, "(V473::Card*) %p detected a command error", this);
+    logInform4(hLog, "(V473::Card*) %p detected a command error -- dir %d, "
+	       "cmd 0x%04x, count %d", this, lastDir, lastMb, lastCount);
 }
 
 void Card::handleCalculationErr()
@@ -228,9 +232,9 @@ void Card::generateInterrupts(bool flg)
 
 bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 {
-    sysOut16(mailbox, mb);
-    sysOut16(count, (uint16_t) n);
-    sysOut16(readWrite, 0);
+    sysOut16(mailbox, lastMb = mb);
+    sysOut16(count, lastCount = (uint16_t) n);
+    sysOut16(readWrite, lastDir = 0);
 
     // Wait up to 40 milliseconds for a response.
 
@@ -243,12 +247,9 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
 bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 {
-    sysOut16(mailbox, mb);
-    sysOut16(count, (uint16_t) n);
-    sysOut16(readWrite, 1);
-
-    ssmBaseAddr->led[16] = Yellow;
-    ssmBaseAddr->led[16] = Black;
+    sysOut16(mailbox, lastMb = mb);
+    sysOut16(count, lastCount = (uint16_t) n);
+    sysOut16(readWrite, lastDir = 1);
 
     // Wait up to 40 milliseconds for a response.
 
