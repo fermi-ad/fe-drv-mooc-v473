@@ -12,6 +12,8 @@
 
 extern "C" UINT16 sysIn16(UINT16*);
 extern "C" void sysOut16(UINT16*, UINT16);
+extern "C" UINT32 sysIn32(UINT32*);
+extern "C" void sysOut32(UINT32*, UINT32);
 
 static void init() __attribute__((constructor));
 static void term() __attribute__((destructor));
@@ -159,59 +161,59 @@ uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
 
 void Card::intHandler()
 {
-    ssmBaseAddr->led[16] = Yellow;
+    ssmBaseAddr->led[0] = Yellow;
     sysOut16(irqSource, 0x1000);
 
     uint16_t const sts = prevIrqSource = sysIn16(irqSource);
 
     if (sts & 0x8000) {
-	ssmBaseAddr->led[17] = Yellow;
+	ssmBaseAddr->led[1] = Yellow;
 	handleCommandErr();
-	ssmBaseAddr->led[17] = Black;
+	ssmBaseAddr->led[1] = Black;
     }
     if (sts & 0x4000) {
-	ssmBaseAddr->led[18] = Yellow;
+	ssmBaseAddr->led[2] = Yellow;
 	handleCalculationErr();
-	ssmBaseAddr->led[18] = Black;
+	ssmBaseAddr->led[2] = Black;
     }
     if (sts & 0x1000) {
-	ssmBaseAddr->led[19] = Yellow;
+	ssmBaseAddr->led[3] = Yellow;
 	handleMissingTCLK();
-	ssmBaseAddr->led[19] = Black;
+	ssmBaseAddr->led[3] = Black;
     }
     if (sts & 0x200) {
-	ssmBaseAddr->led[20] = Yellow;
+	ssmBaseAddr->led[4] = Yellow;
 	handlePSTrackingErr();
-	ssmBaseAddr->led[20] = Black;
+	ssmBaseAddr->led[4] = Black;
     }
     if (sts & 0x10) {
-	ssmBaseAddr->led[21] = Yellow;
+	ssmBaseAddr->led[5] = Yellow;
 	intDone.wakeOne();
-	ssmBaseAddr->led[21] = Black;
+	ssmBaseAddr->led[5] = Black;
     }
     if (sts & 0x8) {
-	ssmBaseAddr->led[22] = Yellow;
+	ssmBaseAddr->led[6] = Yellow;
 	handlePS3Err();
-	ssmBaseAddr->led[22] = Black;
+	ssmBaseAddr->led[6] = Black;
     }
     if (sts & 0x4) {
-	ssmBaseAddr->led[23] = Yellow;
+	ssmBaseAddr->led[7] = Yellow;
 	handlePS2Err();
-	ssmBaseAddr->led[23] = Black;
+	ssmBaseAddr->led[7] = Black;
     }
     if (sts & 0x2) {
-	ssmBaseAddr->led[24] = Yellow;
+	ssmBaseAddr->led[8] = Yellow;
 	handlePS1Err();
-	ssmBaseAddr->led[24] = Black;
+	ssmBaseAddr->led[8] = Black;
     }
     if (sts & 0x1) {
-	ssmBaseAddr->led[25] = Yellow;
+	ssmBaseAddr->led[9] = Yellow;
 	handlePS0Err();
-	ssmBaseAddr->led[25] = Black;
+	ssmBaseAddr->led[9] = Black;
     }
 
     sysOut16(irqSource, sts);
-    ssmBaseAddr->led[16] = Black;
+    ssmBaseAddr->led[0] = Black;
 }
 
 void Card::generateInterrupts(bool flg)
