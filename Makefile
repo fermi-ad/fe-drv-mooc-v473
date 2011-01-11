@@ -7,8 +7,6 @@ SUPPORTED_VERSIONS = 64
 
 MOD_TARGETS = v473.out
 
-DEBUG=1
-
 include ${PRODUCTS_INCDIR}frontend-2.3.mk
 
 v473.o cube.o mooc_class.o : v473.h
