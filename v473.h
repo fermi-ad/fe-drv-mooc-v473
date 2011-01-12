@@ -10,6 +10,7 @@ namespace V473 {
 	uint8_t const vecNum;
 
 	vwpp::Event intDone;
+	bool volatile lastCmdOkay;
 
 	uint16_t* dataBuffer;
 	uint16_t* mailbox;
@@ -93,7 +94,6 @@ namespace V473 {
 	void intHandler();
 
      protected:
-	virtual void handleCommandErr();
 	virtual void handleCalculationErr();
 	virtual void handleMissingTCLK();
 	virtual void handlePSTrackingErr();

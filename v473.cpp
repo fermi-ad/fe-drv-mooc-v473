@@ -36,7 +36,7 @@ static void term()
 using namespace V473;
 
 Card::Card(uint8_t addr, uint8_t intVec) :
-    vecNum(intVec)
+    vecNum(intVec), lastCmdOkay(true)
 {
     char* baseAddr;
 
@@ -113,12 +113,6 @@ void Card::gblIntHandler(Card* const ptr)
     ptr->intHandler();
 }
 
-void Card::handleCommandErr()
-{
-    logInform4(hLog, "(V473::Card*) %p detected a command error -- dir %d, "
-	       "cmd 0x%04x, count %d", this, lastDir, lastMb, lastCount);
-}
-
 void Card::handleCalculationErr()
 {
     logInform1(hLog, "(V473::Card*) %p detected a calculation error", this);
@@ -167,50 +161,46 @@ void Card::intHandler()
 
     uint16_t const sts = prevIrqSource = sysIn16(irqSource);
 
-    if (sts & 0x8000) {
+    if (sts & 0x4000) {
 	ssmBaseAddr->led[1] = Yellow;
-	handleCommandErr();
+	handleCalculationErr();
 	ssmBaseAddr->led[1] = Black;
     }
-    if (sts & 0x4000) {
+    if (sts & 0x1000) {
 	ssmBaseAddr->led[2] = Yellow;
-	handleCalculationErr();
+	handleMissingTCLK();
 	ssmBaseAddr->led[2] = Black;
     }
-    if (sts & 0x1000) {
+    if (sts & 0x200) {
 	ssmBaseAddr->led[3] = Yellow;
-	handleMissingTCLK();
+	handlePSTrackingErr();
 	ssmBaseAddr->led[3] = Black;
     }
-    if (sts & 0x200) {
+    if (sts & 0x10) {
 	ssmBaseAddr->led[4] = Yellow;
-	handlePSTrackingErr();
+	lastCmdOkay = !(sts & 0x8000);
+	intDone.wakeOne();
 	ssmBaseAddr->led[4] = Black;
     }
-    if (sts & 0x10) {
+    if (sts & 0x8) {
 	ssmBaseAddr->led[5] = Yellow;
-	intDone.wakeOne();
+	handlePS3Err();
 	ssmBaseAddr->led[5] = Black;
     }
-    if (sts & 0x8) {
+    if (sts & 0x4) {
 	ssmBaseAddr->led[6] = Yellow;
-	handlePS3Err();
+	handlePS2Err();
 	ssmBaseAddr->led[6] = Black;
     }
-    if (sts & 0x4) {
+    if (sts & 0x2) {
 	ssmBaseAddr->led[7] = Yellow;
-	handlePS2Err();
+	handlePS1Err();
 	ssmBaseAddr->led[7] = Black;
     }
-    if (sts & 0x2) {
-	ssmBaseAddr->led[8] = Yellow;
-	handlePS1Err();
-	ssmBaseAddr->led[8] = Black;
-    }
     if (sts & 0x1) {
-	ssmBaseAddr->led[9] = Yellow;
+	ssmBaseAddr->led[8] = Yellow;
 	handlePS0Err();
-	ssmBaseAddr->led[9] = Black;
+	ssmBaseAddr->led[8] = Black;
     }
 
     sysOut16(irqSource, sts);
@@ -235,7 +225,7 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 40 milliseconds for a response.
 
-    return intDone.wait(40);
+    return intDone.wait(40) && lastCmdOkay;
 }
 
 // Sends the mailbox value, the word count and the SET command to the
@@ -250,7 +240,7 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 40 milliseconds for a response.
 
-    return intDone.wait(40);
+    return intDone.wait(40) && lastCmdOkay;
 }
 
 bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
