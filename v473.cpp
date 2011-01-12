@@ -57,6 +57,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     irqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x800c);
     irqMask = reinterpret_cast<uint16_t*>(baseAddr + 0x8004);
     irqStatus = reinterpret_cast<uint16_t*>(baseAddr + 0x8006);
+    activeIrqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x800a);
 
     // Now that we think we're configured, let's check to see if we
     // are, indeed, a V473.
@@ -159,8 +160,9 @@ void Card::intHandler()
 {
     ssmBaseAddr->led[0] = Yellow;
 
-    uint16_t const sts = prevIrqSource = sysIn16(irqSource);
+    uint16_t const sts = sysIn16(irqSource);
 
+    sysOut16(irqSource, sts);
     if (sts & 0x4000) {
 	ssmBaseAddr->led[1] = Yellow;
 	handleCalculationErr();
@@ -202,8 +204,6 @@ void Card::intHandler()
 	handlePS0Err();
 	ssmBaseAddr->led[8] = Black;
     }
-
-    sysOut16(irqSource, sts);
     ssmBaseAddr->led[0] = Black;
 }
 
@@ -294,6 +294,11 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
 	return true;
     } else
 	throw std::logic_error("# of TCLK events cannot exceed 8");
+}
+
+uint16_t Card::getIrqSource() const
+{
+    return sysIn16(activeIrqSource);
 }
 
 bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)

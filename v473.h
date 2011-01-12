@@ -22,8 +22,7 @@ namespace V473 {
 	uint16_t* irqSource;
 	uint16_t* irqMask;
 	uint16_t* irqStatus;
-
-	uint16_t prevIrqSource;
+	uint16_t* activeIrqSource;
 
 	// No copying!
 
@@ -201,7 +200,7 @@ namespace V473 {
 	    return readBank(lock, 0, cpTriggerMap, intLvl, ptr, n);
 	}
 
-	uint16_t getIrqSource() const { return prevIrqSource; }
+	uint16_t getIrqSource() const;
 
 	bool getModuleId(vwpp::Lock const&, uint16_t*);
 	bool getFirmwareVersion(vwpp::Lock const&, uint16_t*);
