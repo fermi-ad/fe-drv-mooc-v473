@@ -286,12 +286,9 @@ bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
     if (n <= 8) {
 	assert(sysIn16(readWrite) & 2);
 
-	for (size_t ii = 0; ii < 8; ++ii) {
-	    sysOut16(dataBuffer, ii < n ? events[ii] : 0x00fe);
-	    if (!setProperty(lock, 0x4000 + (intLvl << 3) + ii, 1))
-		return false;
-	}
-	return true;
+	for (size_t ii = 0; ii < 8; ++ii)
+	    sysOut16(dataBuffer + ii, ii < n ? events[ii] : 0x00fe);
+	return setProperty(lock, 0x4000 + (intLvl << 3), 8);
     } else
 	throw std::logic_error("# of TCLK events cannot exceed 8");
 }
