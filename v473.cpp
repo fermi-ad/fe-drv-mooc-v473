@@ -164,7 +164,6 @@ uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
 void Card::intHandler()
 {
     ssmBaseAddr->led[0] = Yellow;
-    sysOut16(irqSource, 0x1000);
 
     uint16_t const sts = prevIrqSource = sysIn16(irqSource);
 
