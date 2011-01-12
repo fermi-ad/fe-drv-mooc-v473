@@ -209,7 +209,7 @@ void Card::intHandler()
 
 void Card::generateInterrupts(bool flg)
 {
-    sysOut16(irqEnable, flg ? 1 : 0);
+    sysOut16(irqEnable, flg ? 3 : 2);
 }
 
 // Sends the mailbox value, the word count and the READ command to the
