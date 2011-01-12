@@ -12,8 +12,6 @@
 
 extern "C" UINT16 sysIn16(UINT16*);
 extern "C" void sysOut16(UINT16*, UINT16);
-extern "C" UINT32 sysIn32(UINT32*);
-extern "C" void sysOut32(UINT32*, UINT32);
 
 static void init() __attribute__((constructor));
 static void term() __attribute__((destructor));
@@ -56,7 +54,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     readWrite = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffe);
     resetAddr = reinterpret_cast<uint16_t*>(baseAddr + 0xfffe);
     irqEnable = reinterpret_cast<uint16_t*>(baseAddr + 0x8000);
-    irqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x8002);
+    irqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x800c);
     irqMask = reinterpret_cast<uint16_t*>(baseAddr + 0x8004);
     irqStatus = reinterpret_cast<uint16_t*>(baseAddr + 0x8006);
 
