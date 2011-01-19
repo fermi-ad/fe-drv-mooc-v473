@@ -68,7 +68,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 
     if (sysIn16(readWrite) != 2 || sysIn16(count) != 1 ||
 	sysIn16(dataBuffer) != 473)
-	throw std::runtime_error("VME A16 address doesn't refer to V473 "
+	throw std::runtime_error("VME A24 address doesn't refer to V473 "
 				 "hardware");
 
     sysOut16(mailbox, 0xff01);
