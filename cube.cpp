@@ -1,7 +1,6 @@
 // $Id$
 
 #include "v473.h"
-#include <ssmlite-1.0.h>
 #include <cmath>
 #include <taskLib.h>
 
@@ -233,25 +232,17 @@ STATUS v473_cube(V473::HANDLE const hw)
 		vwpp::Lock lock(hw->mutex);
 		uint8_t const unevent = 0xfe;
 
-		ssmBaseAddr->led[5] = Yellow;
 		hw->setTriggerMap(lock, !ramp, &unevent, 1);
-		ssmBaseAddr->led[5] = Black;
 
-		ssmBaseAddr->led[6] = Yellow;
 		hw->setRamp(lock, 0, ramp + 1, 0, data[0], 2 * (sizeof(path) / sizeof(*path) + 1));
-		ssmBaseAddr->led[6] = Black;
-		ssmBaseAddr->led[5] = Yellow;
 		hw->setRamp(lock, 1, ramp + 1, 0, data[1], 2 * (sizeof(path) / sizeof(*path) + 1));
-		ssmBaseAddr->led[5] = Black;
 
 		// Hand the $0f event to the interrupt assigned to the
 		// next ramp.
 
 		uint8_t const event = 0x0f;
 
-		ssmBaseAddr->led[6] = Yellow;
 		hw->setTriggerMap(lock, ramp, &event, 1);
-		ssmBaseAddr->led[6] = Black;
 	    }
 
 	    // Wait for the ramp to start to play. Then we can switch
