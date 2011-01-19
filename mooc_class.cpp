@@ -672,6 +672,14 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 	     }
 	     break;
 
+	 case 12:
+	     {
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 (*obj)->reset();
+	     }
+	     break;
+
 	 default:
 	    return ERR_UNSUPMT;
 	}
