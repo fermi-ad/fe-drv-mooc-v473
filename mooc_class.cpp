@@ -597,6 +597,24 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 	bool result = true;
 
 	switch (REQ_TO_SUBCODE(req)) {
+	 case 1:
+	     {
+		 size_t const length = req->ILEN;
+		 size_t const offset = req->OFFSET;
+
+		 if (length != sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+		 if (DATAS(req) != 10)
+		     return NOERR;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 (*obj)->reset();
+	     }
+	     break;
+
 	 case 8:
 	     {
 		 size_t const length = req->ILEN;
@@ -669,14 +687,6 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
 		 result = (*obj)->tclkTrigEnable(lock, val == 2);
-	     }
-	     break;
-
-	 case 12:
-	     {
-		 vwpp::Lock lock((*obj)->mutex, 100);
-
-		 (*obj)->reset();
 	     }
 	     break;
 
