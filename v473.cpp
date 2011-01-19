@@ -67,8 +67,10 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     sysOut16(readWrite, 0);
     taskDelay(2);
 
-    if (sysIn16(readWrite) != 2 || sysIn16(count) != 1 || sysIn16(dataBuffer) != 473)
-	throw std::runtime_error("VME A16 address doesn't refer to V473 hardware");
+    if (sysIn16(readWrite) != 2 || sysIn16(count) != 1 ||
+	sysIn16(dataBuffer) != 473)
+	throw std::runtime_error("VME A16 address doesn't refer to V473 "
+				 "hardware");
 
     sysOut16(mailbox, 0xff01);
     sysOut16(count, 1);
@@ -84,8 +86,9 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 
     uint16_t const fpga = sysIn16(dataBuffer);
 
-    logInform5(hLog, "V473: Found hardware -- addr %p, Firmware v%d.%d, FPGA v%d.%d",
-	       dataBuffer, firmware >> 4, firmware & 0xf, fpga >> 4, fpga & 0xf);
+    logInform5(hLog, "V473: Found hardware -- addr %p, Firmware v%d.%d, "
+	       "FPGA v%d.%d", dataBuffer, firmware >> 4, firmware & 0xf,
+	       fpga >> 4, fpga & 0xf);
 
     // Now that we know we're a V473, we can attach the interrupt
     // handler.
@@ -93,7 +96,8 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     if (OK != intConnect(INUM_TO_IVEC((int) intVec),
 			 reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
 			 reinterpret_cast<int>(this)))
-	throw std::runtime_error("cannot connect V473 hardware to interrupt vector");
+	throw std::runtime_error("cannot connect V473 hardware to interrupt "
+				 "vector");
 
     sysIntEnable(1);
     sysOut16(irqStatus, intVec);
