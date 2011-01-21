@@ -53,7 +53,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     readWrite = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffe);
     resetAddr = reinterpret_cast<uint16_t*>(baseAddr + 0xfffe);
     irqEnable = reinterpret_cast<uint16_t*>(baseAddr + 0x8000);
-    irqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x800c);
+    irqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x8002);
     irqMask = reinterpret_cast<uint16_t*>(baseAddr + 0x8004);
     irqStatus = reinterpret_cast<uint16_t*>(baseAddr + 0x8006);
     activeIrqSource = reinterpret_cast<uint16_t*>(baseAddr + 0x800a);
