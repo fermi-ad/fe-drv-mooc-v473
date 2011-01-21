@@ -2,7 +2,7 @@
 
 #include <vxWorks.h>
 #include <stdexcept>
-#include <vwpp-0.1.h>
+#include <vwpp-1.0.h>
 
 namespace V473 {
 
