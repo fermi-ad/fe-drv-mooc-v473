@@ -47,7 +47,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     // Compute the memory-mapped registers based upon the computed
     // base address.
 
-    dataBuffer = reinterpret_cast<__typeof dataBuffer>(baseAddr);
+    dataBuffer = reinterpret_cast<uint16_t*>(baseAddr);
     mailbox = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffa);
     count = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffc);
     readWrite = reinterpret_cast<uint16_t*>(baseAddr + 0x7ffe);
