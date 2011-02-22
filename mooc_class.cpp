@@ -337,7 +337,7 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 	     return NOERR;
 
 	 case 6:		// Scale Factor Table
-	    return readSimpleTable(req, 2, 64, *ivs,
+	    return readSimpleTable(req, 2, 62, *ivs,
 				   &V473::Card::getScaleFactors,
 				   (uint16_t*) rep);
 
@@ -496,7 +496,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 	     return NOERR;
 
 	 case 6:		// Scale Factor Table
-	    return writeSimpleTable(req, 2, 64, *obj,
+	    return writeSimpleTable(req, 2, 62, *obj,
 				    &V473::Card::setScaleFactors,
 				    (uint16_t const*) req->data);
 

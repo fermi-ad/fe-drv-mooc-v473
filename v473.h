@@ -190,7 +190,7 @@ namespace V473 {
 			     uint16_t const intLvl, uint16_t* const ptr,
 			     uint16_t const n)
 	{
-	    return readBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
+	    return readBank(lock, chan, cpScaleFactors, intLvl + 1, ptr, n);
 	}
 
 	bool getTriggerMap(vwpp::Lock const& lock, uint16_t,
@@ -302,7 +302,7 @@ namespace V473 {
 			     uint16_t const intLvl, uint16_t const* const ptr,
 			     uint16_t const n)
 	{
-	    return writeBank(lock, chan, cpScaleFactors, intLvl, ptr, n);
+	    return writeBank(lock, chan, cpScaleFactors, intLvl + 1, ptr, n);
 	}
 
 	bool sineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
