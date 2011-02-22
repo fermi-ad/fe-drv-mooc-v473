@@ -698,7 +698,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 		 uint16_t const val = DATAS(req);
 
 		 if (val != 1 && val != 2)
-		     return NOERR;
+		     return ERR_WRBASCON;
 
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
