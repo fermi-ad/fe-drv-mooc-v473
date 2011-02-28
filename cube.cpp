@@ -152,8 +152,8 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    // Set the scale factor to 1.0.
 
 	    data = 128;
-	    hw->setScaleFactors(lock, 0, 1, &data, 1);
-	    hw->setScaleFactors(lock, 1, 1, &data, 1);
+	    hw->setScaleFactors(lock, 0, 0, &data, 1);
+	    hw->setScaleFactors(lock, 1, 0, &data, 1);
 	    data = 1;
 	    hw->setScaleFactorMap(lock, 0, 0, &data, 1);
 	    hw->setScaleFactorMap(lock, 0, 1, &data, 1);
