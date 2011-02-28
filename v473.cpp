@@ -211,7 +211,6 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
 bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 {
-    printf("set_property(lock, 0x%04x, %d)\n", mb, n);
     sysOut16(mailbox, lastMb = mb);
     sysOut16(count, lastCount = (uint16_t) n);
     sysOut16(readWrite, lastDir = 1);
