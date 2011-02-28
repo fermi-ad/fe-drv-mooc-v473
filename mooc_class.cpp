@@ -614,11 +614,11 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 
 		 switch (DATAS(req)) {
 		  case 1:
-		     result = (*obj)->enablePowerSupply(lock, chan, false);
+		     result = (*obj)->waveformEnable(lock, chan, false);
 		     break;
 
 		  case 2:
-		     result = (*obj)->enablePowerSupply(lock, chan, true);
+		     result = (*obj)->waveformEnable(lock, chan, true);
 		     break;
 
 		  case 3:
@@ -627,36 +627,6 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 
 		  case 10:
 		     (*obj)->reset();
-		     break;
-
-		  default:
-		     return ERR_WRBASCON;
-		 }
-	     }
-	     break;
-
-	 case 8:
-	     {
-		 size_t const length = req->ILEN;
-		 size_t const offset = req->OFFSET;
-		 size_t const chan = REQ_TO_453CHAN(req);
-
-		 if (chan >= 4)
-		     return ERR_BADCHN;
-		 if (length != sizeof(uint16_t))
-		     return ERR_BADLEN;
-		 if (offset != 0)
-		     return ERR_BADOFF;
-
-		 vwpp::Lock lock((*obj)->mutex, 100);
-
-		 switch (DATAS(req)) {
-		  case 1:
-		     result = (*obj)->waveformEnable(lock, chan, false);
-		     break;
-
-		  case 2:
-		     result = (*obj)->waveformEnable(lock, chan, true);
 		     break;
 
 		  default:
@@ -707,7 +677,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 	     break;
 
 	 default:
-	    return ERR_UNSUPMT;
+	    return ERR_WRBASCON;
 	}
 	return result ? NOERR : ERR_MISBOARD;
     }
