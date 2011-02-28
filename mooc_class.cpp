@@ -725,6 +725,25 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
  
     try {
 	switch (REQ_TO_SUBCODE(req)) {
+	 case 1:
+	     {
+		 size_t const chan = REQ_TO_453CHAN(req);
+
+		 if (chan >= 4)
+		     return ERR_BADCHN;
+		 if (length != sizeof(uint16_t))
+		     return ERR_BADLEN;
+		 if (offset != 0)
+		     return ERR_BADOFF;
+
+		 vwpp::Lock lock((*obj)->mutex, 100);
+
+		 return (*obj)->getPowerSupplyStatus(lock, chan,
+						     (uint16_t*) rep) ?
+		     NOERR : ERR_MISBOARD;
+	     }
+	     break;
+
 	 case 8:
 	     {
 		 if (length != 2 * sizeof(uint16_t))

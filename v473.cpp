@@ -341,6 +341,18 @@ bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
 	return false;
 }
 
+bool Card::getPowerSupplyStatus(vwpp::Lock const& lock, uint16_t const chan,
+				uint16_t* const ptr)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    if (readProperty(lock, GEN_ADDR(chan, cpPSStatus), 1)) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
 bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
