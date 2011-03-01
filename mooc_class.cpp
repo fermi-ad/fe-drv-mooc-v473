@@ -327,9 +327,9 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 
 			 if (!((*ivs)->*mt[ii])(lock, REQ_TO_453CHAN(req),
 						(offset % 64) / entrySize,
-						ptr, total))
+						ptr, total / entrySize))
 			     return ERR_MISBOARD;
-			 ptr += total;
+			 ptr += total / entrySize;
 			 offset += total;
 			 length -= total;
 		     }
@@ -486,9 +486,9 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 
 			 if (!((*obj)->*mt[ii])(lock, REQ_TO_453CHAN(req),
 						(offset % 64) / entrySize,
-						ptr, total))
+						ptr, total / entrySize))
 			     return ERR_MISBOARD;
-			 ptr += total;
+			 ptr += total / entrySize;
 			 offset += total;
 			 length -= total;
 		     }
