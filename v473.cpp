@@ -224,8 +224,6 @@ bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
 		    ChannelProperty const prop, uint16_t const start,
 		    uint16_t* const ptr, uint16_t const n)
 {
-    printf("readBank(%d, 0x%04x, %d, %p, %d)\n", chan, prop, start, ptr, n);
-
     if (prop == cpTriggerMap) {
 	if (start >= 256)
 	    throw std::logic_error("interrupt level out of range");
