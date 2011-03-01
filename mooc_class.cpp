@@ -322,14 +322,14 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 		 vwpp::Lock lock((*ivs)->mutex, 100);
 
 		 for (size_t ii = 0; length > 0 && ii < nTables; ++ii)
-		     if (offset < ii * tableSize) {
-			 size_t const total(std::min(length, (ii * tableSize) - offset));
+		     if (offset < (ii + 1) * tableSize) {
+			 size_t const total(std::min(length, ((ii + 1) * tableSize) - offset));
 
 			 if (!((*ivs)->*mt[ii])(lock, REQ_TO_453CHAN(req),
-						(offset % 64) / 2,
-						ptr, total / 2))
+						(offset % 64) / entrySize,
+						ptr, total))
 			     return ERR_MISBOARD;
-			 ptr += total / 2;
+			 ptr += total;
 			 offset += total;
 			 length -= total;
 		     }
@@ -481,14 +481,14 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		 vwpp::Lock lock((*obj)->mutex, 100);
 
 		 for (size_t ii = 0; length > 0 && ii < nTables; ++ii)
-		     if (offset < ii * tableSize) {
-			 size_t const total(std::min(length, (ii * tableSize) - offset));
+		     if (offset < (ii + 1) * tableSize) {
+			 size_t const total(std::min(length, ((ii + 1) * tableSize) - offset));
 
 			 if (!((*obj)->*mt[ii])(lock, REQ_TO_453CHAN(req),
-						(offset % 64) / 2,
-						ptr, total / 2))
+						(offset % 64) / entrySize,
+						ptr, total))
 			     return ERR_MISBOARD;
-			 ptr += total / 2;
+			 ptr += total;
 			 offset += total;
 			 length -= total;
 		     }
