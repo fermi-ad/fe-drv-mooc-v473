@@ -212,6 +212,7 @@ namespace V473 {
 	bool getPowerSupplyStatus(vwpp::Lock const&, uint16_t, uint16_t*);
 	bool getTclkInterruptEnable(vwpp::Lock const&, bool*);
 	bool getDAC(vwpp::Lock const&, uint16_t, uint16_t*);
+	bool getDiagCounters(vwpp::Lock const&, uint16_t, uint16_t, uint16_t*);
 	bool setDAC(vwpp::Lock const&, uint16_t, uint16_t);
 
 	bool enablePowerSupply(vwpp::Lock const&, uint16_t, bool);

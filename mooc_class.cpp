@@ -230,7 +230,7 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 			      V473::Card* const* const obj)
 {
     static size_t const entrySize = 2;
-    static size_t const maxSize = 42 * entrySize;
+    static size_t const maxSize = 44 * entrySize;
     size_t length = req->ILEN;
     size_t offset = req->OFFSET;
 
@@ -240,77 +240,43 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 	return ERR_BADOFF;
     if (offset + length > maxSize)
 	return ERR_BADOFLEN;
+    if (REQ_TO_453CHAN(req) >= 4)
+	return ERR_BADCHN;
 
     vwpp::Lock lock((*obj)->mutex, 100);
 
     if (offset == 0) {
-	if (!(*obj)->getFirmwareVersion(lock, (uint16_t*) rep))
+	if (!(*obj)->getDAC(lock, REQ_TO_453CHAN(req), (uint16_t*) rep))
 	    return ERR_MISBOARD;
 	BUMP(length, offset, rep, 2);
     }
 
     if (offset == 2 && length >= 2) {
-	if (!(*obj)->getActiveRamp(lock, (uint16_t*) rep))
-	    return ERR_MISBOARD;
+	*(uint16_t*) rep = 0;
 	BUMP(length, offset, rep, 2);
     }
 
     if (offset == 4 && length >= 2) {
-	if (!(*obj)->getActiveScaleFactor(lock, (uint16_t*) rep))
-	    return ERR_MISBOARD;
+	*(uint16_t*) rep = 0;
 	BUMP(length, offset, rep, 2);
     }
 
-    if (offset == 6 && length >= 2) {
-	size_t const amount = length > 8 ? 8 : length;
+    if (offset >= 6 && offset < 24 && length >= 2) {
+	size_t const amount =
+	    length > (24 - offset) ? (24 - offset) : length;
 
-	memset(rep, amount, 0);
+	if (!(*obj)->getDiagCounters(lock, (offset - 6) / entrySize,
+				     length / entrySize, (uint16_t*) rep))
+	    return ERR_MISBOARD;
 	BUMP(length, offset, rep, amount);
     }
 
-    if (offset == 14 && length >= 2) {
-	if (!(*obj)->getCurrentSegment(lock, (uint16_t*) rep))
-	    return ERR_MISBOARD;
-	BUMP(length, offset, rep, 2);
-    }
-
-    if (offset == 16 && length >= 2) {
-	size_t const amount = length > 8 ? 8 : length;
+    if (offset >= 24 && length >= 2) {
+	size_t const amount =
+	    length > (64 - offset) ? (64 - offset) : length;
 
 	memset(rep, amount, 0);
-	BUMP(length, offset, rep, amount);
-    }
-
-    if (offset == 24 && length >= 2) {
-	if (!(*obj)->getModuleId(lock, (uint16_t*) rep))
-	    return ERR_MISBOARD;
 	BUMP(length, offset, rep, 2);
-    }
-
-    if (offset == 26 && length >= 2) {
-	size_t const amount = length > 42 ? 42 : length;
-
-	memset(rep, amount, 0);
-	BUMP(length, offset, rep, amount);
-    }
-
-    if (offset == 68 && length >= 2) {
-	if (!(*obj)->getCurrentIntLvl(lock, (uint16_t*) rep))
-	    return ERR_MISBOARD;
-	BUMP(length, offset, rep, 2);
-    }
-
-    if (offset == 70 && length >= 2) {
-	if (!(*obj)->getLastTclkEvent(lock, (uint16_t*) rep))
-	    return ERR_MISBOARD;
-	BUMP(length, offset, rep, 2);
-    }
-
-    if (offset == 72 && length >= 2) {
-	size_t const amount = length > 12 ? 12 : length;
-
-	memset(rep, amount, 0);
-	BUMP(length, offset, rep, amount);
     }
 
     return NOERR;

@@ -376,6 +376,17 @@ bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
+bool Card::getDiagCounters(vwpp::Lock const& lock, uint16_t const start,
+			   uint16_t const n, uint16_t* const ptr)
+{
+    if (readProperty(lock, 0x4400 + start, n)) {
+	for (uint16_t ii = 0; ii < n; ++ii)
+	    ptr[ii] = sysIn16(dataBuffer + ii);
+	return true;
+    } else
+	return false;
+}
+
 bool Card::getTclkInterruptEnable(vwpp::Lock const& lock, bool* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
