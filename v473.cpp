@@ -576,7 +576,7 @@ STATUS v473_test(V473::HANDLE const hw, uint8_t const chan)
 	// Set the scale factor to 1.0.
 
 	data[0] = 128;
-	if (!hw->setScaleFactors(lock, chan, 1, data, 1))
+	if (!hw->setScaleFactors(lock, chan, 0, data, 1))
 	    throw std::runtime_error("error setting scale factor");
 	logInform0(hLog, "set scale factor #1 to 1.0");
 	data[0] = 1;
