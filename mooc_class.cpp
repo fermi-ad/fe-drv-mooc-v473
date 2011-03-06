@@ -710,7 +710,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 		     break;
 
 		  case 10:
-		     (*obj)->reset();
+		     (*obj)->reset(lock);
 		     break;
 
 		  default:

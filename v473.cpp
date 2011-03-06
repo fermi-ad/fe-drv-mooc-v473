@@ -34,6 +34,17 @@ static void term()
 
 using namespace V473;
 
+bool Card::detect(vwpp::Lock const&)
+{
+    sysOut16(mailbox, 0xff00);
+    sysOut16(count, 1);
+    sysOut16(readWrite, 0);
+    taskDelay(2);
+
+    return sysIn16(readWrite) == 2 && sysIn16(count) == 1 &&
+	sysIn16(dataBuffer) == 473;
+}
+
 Card::Card(uint8_t addr, uint8_t intVec) :
     vecNum(intVec), lastCmdOkay(true)
 {
@@ -61,13 +72,9 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     // Now that we think we're configured, let's check to see if we
     // are, indeed, a V473.
 
-    sysOut16(mailbox, 0xff00);
-    sysOut16(count, 1);
-    sysOut16(readWrite, 0);
-    taskDelay(2);
+    vwpp::Lock lock(mutex);
 
-    if (sysIn16(readWrite) != 2 || sysIn16(count) != 1 ||
-	sysIn16(dataBuffer) != 473)
+    if (!detect(lock))
 	throw std::runtime_error("VME A24 address doesn't refer to V473 "
 				 "hardware");
 
@@ -110,6 +117,23 @@ Card::~Card()
     intDisconnect(INUM_TO_IVEC((int) vecNum),
 		  reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
 		  reinterpret_cast<int>(this));
+}
+
+void Card::reset(vwpp::Lock const& lock)
+{
+    *resetAddr = 0;
+
+    // Loop until the hardware responds.
+
+    do {
+	taskDelay(2);
+    } while (!detect(lock));
+
+    // Re-enable interrupts.
+
+    sysOut16(irqStatus, vecNum);
+    sysOut16(irqSource, 0xffff);
+    sysOut16(irqMask, 0xd21f);
 }
 
 void Card::gblIntHandler(Card* const ptr)

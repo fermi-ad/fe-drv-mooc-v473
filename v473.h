@@ -1,7 +1,6 @@
 // $Id$
 
 #include <vxWorks.h>
-#include <taskLib.h>
 #include <stdexcept>
 #include <vwpp-1.0.h>
 
@@ -93,6 +92,8 @@ namespace V473 {
 
 	void intHandler();
 
+	bool detect(vwpp::Lock const&);
+
      protected:
 	virtual void handleCalculationErr();
 	virtual void handleMissingTCLK();
@@ -108,7 +109,7 @@ namespace V473 {
 	Card(uint8_t, uint8_t);
 	virtual ~Card();
 
-	void reset() { *resetAddr = 0; taskDelay(60); }
+	void reset(vwpp::Lock const&);
 	void generateInterrupts(bool);
 
 	uint16_t getActiveInterruptLevel(vwpp::Lock const&);
