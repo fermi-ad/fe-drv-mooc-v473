@@ -36,6 +36,7 @@ using namespace V473;
 
 bool Card::detect(vwpp::Lock const&)
 {
+    sysOut16(dataBuffer, 0);
     sysOut16(mailbox, 0xff00);
     sysOut16(count, 1);
     sysOut16(readWrite, 0);
