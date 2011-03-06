@@ -135,6 +135,7 @@ void Card::reset(vwpp::Lock const& lock)
     sysOut16(irqStatus, vecNum);
     sysOut16(irqSource, 0xffff);
     sysOut16(irqMask, 0xd21f);
+    generateInterrupts(true);
 }
 
 void Card::gblIntHandler(Card* const ptr)
