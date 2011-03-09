@@ -275,12 +275,10 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 
     if (offset >= 24 && length >= 2) {
 	size_t const amount =
-	    length > (64 - offset) ? (64 - offset) : length;
+	    length > (88 - offset) ? (88 - offset) : length;
 
 	memset(rep, amount, 0);
-	BUMP(length, offset, rep, 2);
     }
-
     return NOERR;
 }
 
