@@ -268,7 +268,7 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 	    length > (24 - offset) ? (24 - offset) : length;
 
 	if (!(*obj)->getDiagCounters(lock, (offset - 6) / entrySize,
-				     length / entrySize, (uint16_t*) rep))
+				     amount / entrySize, (uint16_t*) rep))
 	    return ERR_MISBOARD;
 	BUMP(length, offset, rep, amount);
     }
