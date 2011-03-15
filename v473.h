@@ -49,7 +49,8 @@ namespace V473 {
 	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39,
 	    cpTriggerMap = 0x4000, cpTclkInterruptEnable = 0x4200,
 	    cpActiveInterruptLevel = 0x4210, cpLastTclkEvent = 0x4211,
-	    cpModuleID = 0xff00, cpFirmwareVersion = 0xff01
+	    cpInterruptCounter = 0x4220, cpModuleID = 0xff00,
+	    cpFirmwareVersion = 0xff01
 	};
 
 	enum SineMode {
@@ -113,6 +114,12 @@ namespace V473 {
 	void generateInterrupts(bool);
 
 	uint16_t getActiveInterruptLevel(vwpp::Lock const&);
+
+	bool getIntCounters(vwpp::Lock const& lock, uint16_t const start,
+			    uint16_t* const ptr, uint16_t const n)
+	{
+	    return readBank(lock, 0, cpInterruptCounter, start, ptr, n);
+	}
 
 	bool getDelays(vwpp::Lock const& lock, uint16_t const chan,
 		       uint16_t const intLvl, uint16_t* const ptr,
