@@ -7,6 +7,7 @@
 #include "v473.h"
 
 int v473_lock_tmo = 1500;
+int v473_debug = 0;
 
 typedef unsigned char chan_t;
 typedef unsigned char type_t;
@@ -248,6 +249,9 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
     vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
 
     if (offset == 0) {
+	if (v473_debug & 1)
+	    printf("Called V473::Card::getDAC() with offset %d, length %d.\n",
+		   offset, length);
 	if (!(*obj)->getDAC(lock, REQ_TO_453CHAN(req), (uint16_t*) rep))
 	    return ERR_MISBOARD;
 	BUMP(length, offset, rep, 2);
@@ -267,6 +271,9 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 	size_t const amount =
 	    length > (24 - offset) ? (24 - offset) : length;
 
+	if (v473_debug & 1)
+	    printf("Called V473::Card::getDiagCounters() with offset %d, "
+		   "length %d.\n", offset, length);
 	if (!(*obj)->getDiagCounters(lock, (offset - 6) / entrySize,
 				     amount / entrySize, (uint16_t*) rep))
 	    return ERR_MISBOARD;
@@ -277,6 +284,9 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 	size_t const amount =
 	    length > (88 - offset) ? (88 - offset) : length;
 
+	if (v473_debug & 1)
+	    printf("Called V473::Card::getIntCounters() with offset %d, "
+		   "length %d.\n", offset, length);
 	if (!(*obj)->getIntCounters(lock, (offset - 24) / entrySize,
 				    (uint16_t*) rep, amount / entrySize))
 	    return ERR_MISBOARD;
