@@ -251,7 +251,7 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
     if (offset == 0) {
 	if (v473_debug & 1)
 	    printf("Called V473::Card::getDAC() with offset %d, length %d.\n",
-		   offset, length);
+		   offset / entrySize, length / entrySize);
 	if (!(*obj)->getDAC(lock, REQ_TO_453CHAN(req), (uint16_t*) rep))
 	    return ERR_MISBOARD;
 	BUMP(length, offset, rep, 2);
@@ -273,7 +273,8 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 
 	if (v473_debug & 1)
 	    printf("Called V473::Card::getDiagCounters() with offset %d, "
-		   "length %d.\n", offset, length);
+		   "length %d.\n", (offset - 6) / entrySize,
+		   amount / entrySize);
 	if (!(*obj)->getDiagCounters(lock, (offset - 6) / entrySize,
 				     amount / entrySize, (uint16_t*) rep))
 	    return ERR_MISBOARD;
@@ -286,7 +287,8 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
 
 	if (v473_debug & 1)
 	    printf("Called V473::Card::getIntCounters() with offset %d, "
-		   "length %d.\n", offset, length);
+		   "length %d.\n", (offset - 24) / entrySize,
+		   amount / entrySize);
 	if (!(*obj)->getIntCounters(lock, (offset - 24) / entrySize,
 				    (uint16_t*) rep, amount / entrySize))
 	    return ERR_MISBOARD;
