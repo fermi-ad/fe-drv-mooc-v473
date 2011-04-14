@@ -625,10 +625,17 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
+		 uint16_t sts;
 		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
 
-		 return (*obj)->setDAC(lock, chan, DATAS(req)) ?
-		     NOERR : ERR_MISBOARD;
+		 if (NOERR == (*obj)->getPowerSupplyStatus(lock, chan, &sts))
+		     if (!(sts & 0x100))
+			 return (*obj)->setDAC(lock, chan, DATAS(req)) ?
+			     NOERR : ERR_MISBOARD;
+		     else
+			 return ERR_STACTIVE;
+		 else
+		     return ERR_MISBOARD;
 	     }
 	     break;
 
