@@ -53,8 +53,8 @@ static void term(void)
 
 // This function initializes an instance of the MOOC V473 class.
 
-static STATUS objInit(short const oid, V473::Card* const ptr, void const*,
-		      V473::Card** const ivs)
+STATUS objectInit(short const oid, V473::Card* const ptr, void const*,
+	       V473::Card** const ivs)
 {
     *ivs = ptr;
     return OK;
@@ -925,7 +925,7 @@ STATUS v473_create_mooc_class(uint8_t cls)
 	printf("Error trying to name the class.\n");
 	return ERROR;
     }
-    if (NOERR != add_class_msg(cls, Init, (PMETHOD) objInit)) {
+    if (NOERR != add_class_msg(cls, Init, (PMETHOD) objectInit)) {
 	printf("Error trying to add the Init handler.\n");
 	return ERROR;
     }
