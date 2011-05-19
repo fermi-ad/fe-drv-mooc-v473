@@ -7,6 +7,7 @@
 #include <iv.h>
 #include <intLib.h>
 #include <taskLib.h>
+#include <cstdio>
 #include <cassert>
 
 extern "C" UINT16 sysIn16(UINT16*);
@@ -115,9 +116,11 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 Card::~Card()
 {
     generateInterrupts(false);
+#if VX_VERSION > 55
     intDisconnect(INUM_TO_IVEC((int) vecNum),
 		  reinterpret_cast<VOIDFUNCPTR>(gblIntHandler),
 		  reinterpret_cast<int>(this));
+#endif
 }
 
 void Card::reset(vwpp::Lock const& lock)
