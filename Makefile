@@ -3,9 +3,12 @@
 VID = 1.2
 PRODUCT = 1
 
-SUPPORTED_VERSIONS = 61 64 67
+SUPPORTED_VERSIONS = 55 61 64 67
 
-MOD_TARGETS = v473.out v473-cube.out
+MOD_TARGETS = v473.out
+MOD_61_TARGETS = v473-cube.out
+MOD_64_TARGETS = v473-cube.out
+MOD_67_TARGETS = v473-cube.out
 
 include ${PRODUCTS_INCDIR}frontend-2.3.mk
 
