@@ -5,7 +5,7 @@
 #include <taskLib.h>
 
 
-STATUS v473_autotest(V473::HANDLE const hw)
+STATUS v473_autotest(V473::HANDLE const hw, uint8_t const test_num)
 {
     try {
 	{
