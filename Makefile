@@ -12,7 +12,7 @@ MOD_67_TARGETS = v473-cube.out
 
 include ${PRODUCTS_INCDIR}frontend-2.3.mk
 
-v473.o cube.o mooc_class.o : v473.h
+v473.o cube.o mooc_class.o test_v473.o : v473.h
 
 v473.out : v473.o mooc_class.o ${PRODUCTS_LIBDIR}libvwpp-1.0.a
 	${make-mod}
@@ -20,5 +20,5 @@ v473.out : v473.o mooc_class.o ${PRODUCTS_LIBDIR}libvwpp-1.0.a
 v473-cube.out : cube.o ${PRODUCTS_LIBDIR}libvwpp-1.0.a
 	${make-mod}
 
-v473-dan.out : cube.o ${PRODUCTS_LIBDIR}libvwpp-1.0.a
+v473-dan.out : test_v473.o ${PRODUCTS_LIBDIR}libvwpp-1.0.a
 	${make-mod}
