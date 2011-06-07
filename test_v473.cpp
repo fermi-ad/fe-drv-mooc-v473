@@ -3,7 +3,7 @@
 #include "v473.h"
 #include <cmath>
 #include <taskLib.h>
-
+#include <cstdio>
 
 STATUS v473_autotest(V473::HANDLE const hw, uint8_t const test_num)
 {
