@@ -17,7 +17,7 @@ STATUS v473_autotest(V473::HANDLE const hw, uint8_t const test_num)
 	    hw->waveformEnable(lock, 0, false);
 	    hw->waveformEnable(lock, 1, false);
 	    
-	    printf("Hello, world\r\n");
+	    printf("Hello, world!!!!!r\n");
 
 
 	}
