@@ -26,7 +26,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 	{
         hw->enablePowerSupply(lock, channel_drive, false);
 	}
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(2); // Give card a chance to change outputs and update status
 
 // Toggle PS enable outputs
 	for(channel_drive = 0; channel_drive < 4; channel_drive++)
@@ -48,7 +48,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 		}
 
         hw->enablePowerSupply(lock, channel_drive, true);
-        taskDelay(10); // Give card a chance to change outputs and update status
+        taskDelay(2); // Give card a chance to change outputs and update status
 
 		for(channel_read = 0; channel_read < 4; channel_read++)
 		{
@@ -67,7 +67,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 		}
 
         hw->enablePowerSupply(lock, channel_drive, false);
-        taskDelay(10); // Give card a chance to change outputs and update status
+        taskDelay(2); // Give card a chance to change outputs and update status
 	}
 
 // Toggle PS reset outputs
@@ -84,7 +84,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
         }
         
-        taskDelay(10); // Give card a chance to change outputs and update status
+        taskDelay(2); // Give card a chance to change outputs and update status
         
         for(channel_read = 0; channel_read < 4; channel_read++)
         {
@@ -117,7 +117,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
         }
         
-        taskDelay(10); // Give card a chance to change outputs and update status
+        taskDelay(2); // Give card a chance to change outputs and update status
         
         for(channel_read = 0; channel_read < 4; channel_read++)
         {
