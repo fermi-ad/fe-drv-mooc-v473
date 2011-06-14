@@ -103,7 +103,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
         while((ps_stat_received & 0x2000) != 0x2000) // Sniff the PS Reset status bit
         {
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
-            taskDelay(1);
+            taskDelay(2);
             retries++;
         }
         
@@ -154,7 +154,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
         while((ps_stat_received & 0x2000) != 0x0000) // Sniff the PS Reset status bit
         {
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
-            taskDelay(1);
+            taskDelay(2);
             retries++;
         }
         
@@ -192,11 +192,11 @@ STATUS v473_autotest(V473::HANDLE const hw, uint8_t const test_num)
 
 	    printf("Hello, world!!!!!\n");
 	    
-	    printf("Resetting V473...\r\r");
+//	    printf("Resetting V473...\r\r");
 	    
 	    {
-	        vwpp::Lock lock(hw->mutex);
-            hw->reset(lock);
+//	        vwpp::Lock lock(hw->mutex);
+//            hw->reset(lock);
 	    }
 	    
 	    switch(test_num)
