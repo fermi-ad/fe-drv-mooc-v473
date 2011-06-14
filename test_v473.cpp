@@ -36,13 +36,13 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
 			ps_stat_received &= ps_stat_mask;
-			ps_stat_expected = 0x0000;
+			ps_stat_expected = 0xFFFF;
 
 			if(ps_stat_received != ps_stat_expected)
 			{
 				printf("\nDiscIO Error, Reading Channel %d\n", channel_read);
-				printf("Expected 0x%4X\n", ps_stat_expected);
-				printf("Received 0x%4X\n", ps_stat_received);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
 				return -1;
 			}
 		}
@@ -55,13 +55,14 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
 			ps_stat_received &= ps_stat_mask;
-			ps_stat_expected = 0x0000 | (0x0001 << (2*channel_drive));
+//			ps_stat_expected = 0x0000 | (0x0001 << (2*channel_drive));
+			ps_stat_expected = 0xFFFF & ~(0x0001 << (2*channel_drive));
 
 			if(ps_stat_received != ps_stat_expected)
 			{
 				printf("\nDiscIO Error, Reading Channel %d\n", channel_read);
-				printf("Expected 0x%4X\n", ps_stat_expected);
-				printf("Received 0x%4X\n", ps_stat_received);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
 				return -1;
 			}
 		}
@@ -103,8 +104,8 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			if(ps_stat_received != ps_stat_expected)
 			{
 				printf("\nDiscIO Error, Reading Channel %d\n", channel_read);
-				printf("Expected 0x%4X\n", ps_stat_expected);
-				printf("Received 0x%4X\n", ps_stat_received);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
 				return -1;
 			}
         }
@@ -129,8 +130,8 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			if(ps_stat_received != ps_stat_expected)
 			{
 				printf("\nDiscIO Error, Reading Channel %d\n", channel_read);
-				printf("Expected 0x%4X\n", ps_stat_expected);
-				printf("Received 0x%4X\n", ps_stat_received);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
 				return -1;
 			}
         }
