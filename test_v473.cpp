@@ -165,7 +165,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
             hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 			ps_stat_received &= ps_stat_mask;
             
-            ps_stat_expected = 0x0000;
+            ps_stat_expected = 0x00FF;
 
 			if(ps_stat_received != ps_stat_expected)
 			{
