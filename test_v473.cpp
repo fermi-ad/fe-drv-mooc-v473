@@ -99,7 +99,8 @@ int DoTestDiscIO(V473::HANDLE const hw)
         
         retries = 0;
         
-        while(((ps_stat_received & 0x2000) != 0x2000) && (retries < 20)) // Sniff the PS Reset status bit
+//        while(((ps_stat_received & 0x2000) != 0x2000) && (retries < 20)) // Sniff the PS Reset status bit
+        while((ps_stat_received & 0x2000) != 0x2000) // Sniff the PS Reset status bit
         {
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
             taskDelay(1);
