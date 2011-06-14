@@ -116,6 +116,8 @@ int DoTestDiscIO(V473::HANDLE const hw)
         
         for(channel_read = 0; channel_read < 4; channel_read++)
         {
+			test_step = 0x0002 | (channel_drive << 8) | (channel_read << 4);
+			
             hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 			ps_stat_received &= ps_stat_mask;
             
@@ -130,10 +132,15 @@ int DoTestDiscIO(V473::HANDLE const hw)
 
 			if(ps_stat_received != ps_stat_expected)
 			{
-				printf("\nDiscIO Error, Reading Channel %d\n", channel_read);
+				printf("\nTest Step %04X\n", test_step);
+				printf("DiscIO Error, Reading Channel %d\n", channel_read);
 				printf("Expected 0x%04X\n", ps_stat_expected);
 				printf("Received 0x%04X\n", ps_stat_received);
 				return -1;
+			}
+			else
+			{
+				printf("\nTest Step %04X\n", test_step);
 			}
         }
 
