@@ -471,7 +471,7 @@ bool Card::enablePowerSupply(vwpp::Lock const& lock, uint16_t const chan,
     assert(sysIn16(readWrite) & 2);
 
     sysOut16(dataBuffer, static_cast<uint16_t>(en));
-    return setProperty(lock, cpPowerSupplyEnable, 1);
+    return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyEnable), 1);
 }
 
 bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
@@ -479,13 +479,7 @@ bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
     assert(sysIn16(readWrite) & 2);
 
     sysOut16(dataBuffer, 1);
-    if (setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1)) {
-	assert(sysIn16(readWrite) & 2);
-
-	sysOut16(dataBuffer, 0);
-	return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1);
-    } else
-	return false;
+    return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1);
 }
 
 V473::HANDLE v473_create(int addr, int intVec)

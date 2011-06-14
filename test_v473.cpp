@@ -14,10 +14,12 @@ int DoTestDiscIO(V473::HANDLE const hw)
 {
 	uint16_t channel_drive, channel_read;
 
-	const uint16_t ps_stat_mask = 0x28FF;
+	const uint16_t ps_stat_mask = 0x24FF;
 	uint16_t ps_stat_expected, ps_stat_received;
 	
 	uint16_t test_step = 0;
+	
+	int retries = 0;
 	
 	printf("\nTesting V473 Discrete I/O\n");
 
@@ -31,8 +33,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
     taskDelay(10); // Give card a chance to change outputs and update status
 
 // Toggle PS enable outputs
-//	for(channel_drive = 0; channel_drive < 4; channel_drive++)
-	for(channel_drive = 0; channel_drive < 1; channel_drive++)   // ************  FIX!!!!!!*********************
+	for(channel_drive = 0; channel_drive < 4; channel_drive++)
 	{
 		for(channel_read = 0; channel_read < 4; channel_read++)
 		{
@@ -63,7 +64,15 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
 			ps_stat_received &= ps_stat_mask;
-			ps_stat_expected = 0x00FF & ~(0x0001 << (2*channel_drive));
+            
+			if(channel_drive == channel_read)
+            {
+    			ps_stat_expected = 0x04FF & ~(0x0001 << (2*channel_drive));
+            }
+            else
+            {
+    			ps_stat_expected = 0x00FF & ~(0x0001 << (2*channel_drive));
+            }
 
 			if(ps_stat_received != ps_stat_expected)
 			{
@@ -88,9 +97,19 @@ int DoTestDiscIO(V473::HANDLE const hw)
 //  It may take up to a second to see the output change.
         hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
         
-        while((ps_stat_received & 0x2000) != 0x2000) // Sniff the PS Reset status bit
+        retries = 0;
+        
+        while(((ps_stat_received & 0x2000) != 0x2000) && (retries < 20)) // Sniff the PS Reset status bit
         {
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
+            taskDelay(1);
+            retries++;
+        }
+        
+        if(retries == 20)
+        {
+            printf("\nTimeout waiting for PS Reset\n");
+            return -1;
         }
         
         taskDelay(10); // Give card a chance to change outputs and update status
@@ -121,9 +140,13 @@ int DoTestDiscIO(V473::HANDLE const hw)
 // Wait for the Reset output to turn off
         hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
         
-        while((ps_stat_received & 0x2000) != 0x0000) // Sniff the PS Reset status bit
+        retries = 0;
+        
+        while(((ps_stat_received & 0x2000) != 0x0000) && (retries < 20)) // Sniff the PS Reset status bit
         {
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
+            taskDelay(1);
+            retries++;
         }
         
         taskDelay(10); // Give card a chance to change outputs and update status
