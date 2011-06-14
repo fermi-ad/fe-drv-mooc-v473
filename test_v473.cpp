@@ -31,11 +31,12 @@ int DoTestDiscIO(V473::HANDLE const hw)
     taskDelay(10); // Give card a chance to change outputs and update status
 
 // Toggle PS enable outputs
-	for(channel_drive = 0; channel_drive < 4; channel_drive++)
+//	for(channel_drive = 0; channel_drive < 4; channel_drive++)
+	for(channel_drive = 0; channel_drive < 1; channel_drive++)   // ************  FIX!!!!!!*********************
 	{
 		for(channel_read = 0; channel_read < 4; channel_read++)
 		{
-			test_step = 0x0000 | channel_drive << 8 | channel_read << 4;
+			test_step = 0x0000 | (channel_drive << 8) | (channel_read << 4);
     		
     		hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
@@ -57,7 +58,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 
 		for(channel_read = 0; channel_read < 4; channel_read++)
 		{
-			test_step = 0x0001 | channel_drive << 8 | channel_read << 4;
+			test_step = 0x0001 | (channel_drive << 8) | (channel_read << 4);
 
 			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
@@ -92,7 +93,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
         }
         
-        taskDelay(2); // Give card a chance to change outputs and update status
+        taskDelay(10); // Give card a chance to change outputs and update status
         
         for(channel_read = 0; channel_read < 4; channel_read++)
         {
@@ -101,11 +102,11 @@ int DoTestDiscIO(V473::HANDLE const hw)
             
             if(channel_drive == channel_read)
             {
-                ps_stat_expected = 0x2055 | (0x0002 << (2*channel_drive));
+                ps_stat_expected = 0x20FF & ~(0x0002 << (2*channel_drive));
             }
             else
             {
-                ps_stat_expected = 0x0055 | (0x0002 << (2*channel_drive));
+                ps_stat_expected = 0x00FF & ~(0x0002 << (2*channel_drive));
             }
 
 			if(ps_stat_received != ps_stat_expected)
@@ -125,7 +126,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
             hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
         }
         
-        taskDelay(2); // Give card a chance to change outputs and update status
+        taskDelay(10); // Give card a chance to change outputs and update status
         
         for(channel_read = 0; channel_read < 4; channel_read++)
         {
