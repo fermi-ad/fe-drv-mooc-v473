@@ -28,14 +28,14 @@ int DoTestDiscIO(V473::HANDLE const hw)
 	{
         hw->enablePowerSupply(lock, channel_drive, false);
 	}
-    taskDelay(2); // Give card a chance to change outputs and update status
+    taskDelay(10); // Give card a chance to change outputs and update status
 
 // Toggle PS enable outputs
 	for(channel_drive = 0; channel_drive < 4; channel_drive++)
 	{
 		for(channel_read = 0; channel_read < 4; channel_read++)
 		{
-			test_step = 0x0000 + channel_drive << 8 + channel_read << 4;
+			test_step = 0x0000 | channel_drive << 8 | channel_read << 4;
     		
     		hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
@@ -53,11 +53,11 @@ int DoTestDiscIO(V473::HANDLE const hw)
 		}
 
         hw->enablePowerSupply(lock, channel_drive, true);
-        taskDelay(2); // Give card a chance to change outputs and update status
+        taskDelay(10); // Give card a chance to change outputs and update status
 
 		for(channel_read = 0; channel_read < 4; channel_read++)
 		{
-			test_step = 0x0001 + channel_drive << 8 + channel_read << 4;
+			test_step = 0x0001 | channel_drive << 8 | channel_read << 4;
 
 			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
 
@@ -67,7 +67,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			if(ps_stat_received != ps_stat_expected)
 			{
 				printf("\nTest Step %04X\n", test_step);
-				printf("\nDiscIO Error, Reading Channel %d\n", channel_read);
+				printf("DiscIO Error, Reading Channel %d\n", channel_read);
 				printf("Expected 0x%04X\n", ps_stat_expected);
 				printf("Received 0x%04X\n", ps_stat_received);
 				return -1;
@@ -75,7 +75,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 		}
 
         hw->enablePowerSupply(lock, channel_drive, false);
-        taskDelay(2); // Give card a chance to change outputs and update status
+        taskDelay(10); // Give card a chance to change outputs and update status
 	}
 
 // Toggle PS reset outputs
