@@ -190,14 +190,14 @@ int TestVmeBus(V473::HANDLE const hw)
     
     for(size_t index = 0; index < 10; index++)
     {
-        sysOut16(dataBuffer+index, test_pattern[index]);
+        sysOut16(dataBuffer+index, test_pattern[index]); // Write to <base address> + 2*index
     }
                                        
     for(size_t index = 0; index < 10; index++)
     {
-        receivedData = sysIn16(dataBuffer+index);
+        receivedData = sysIn16(dataBuffer+index); // Read from <base address> + 2*index
         
-        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", index, test_pattern[index], receivedData);
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", index*2, test_pattern[index], receivedData);
         
         if(receivedData != test_pattern[index])
         {
@@ -211,16 +211,16 @@ int TestVmeBus(V473::HANDLE const hw)
     // Address Bus Bit Independence
     printf("\nTesting VME -> Dual Port Address Bus...\n");
     
-    sysOut16(dataBuffer+0x7FFA, 0xFFFF); // Load MB Addr reg with an invalid value to keep from stepping on anything
+    sysOut16(dataBuffer+(0x7FFA>>1), 0xFFFF); // Load MB Addr reg with an invalid value to keep from stepping on anything
     
     for(size_t index = 0; index < 10; index++)
     {
-        sysOut16(dataBuffer+(test_pattern[index] & 0x7FFE), 0x5555);
+        sysOut16(dataBuffer+((test_pattern[index] & 0x7FFE)>>1), 0x5555);
     }
     
     for(size_t index = 0; index < 10; index++)
     {
-        receivedData = sysIn16(dataBuffer+(test_pattern[index] & 0x7FFE));
+        receivedData = sysIn16(dataBuffer+((test_pattern[index] & 0x7FFE)>>1));
         expectedData = 0x5555;
         
         printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (test_pattern[index] & 0x7FFE), expectedData, receivedData);
@@ -233,12 +233,12 @@ int TestVmeBus(V473::HANDLE const hw)
         
         printf("\n");
         
-        sysOut16(dataBuffer+(0x0001 << index), 0xAAAA);
+        sysOut16(dataBuffer+((test_pattern[index] & 0x7FFE)>>1), 0xAAAA);
     }
                                        
     for(size_t index = 0; index < 10; index++)
     {
-        receivedData = sysIn16(dataBuffer+(test_pattern[index] & 0x7FFE));
+        receivedData = sysIn16(dataBuffer+((test_pattern[index] & 0x7FFE)>>1));
         expectedData = 0xAAAA;
         
         printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (test_pattern[index] & 0x7FFE), expectedData, receivedData);
