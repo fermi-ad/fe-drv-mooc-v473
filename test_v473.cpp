@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <ctype.h>
 
 //------------------------------------------------------------------------------
 // DoTestDiscIO
@@ -193,7 +194,12 @@ STATUS v473_autotest(V473::HANDLE const hw)
             printf("  5:  Play Ramps\n");
             printf("  Q:  Quit this program\n");
             
-            scanf("%c", &test_num);
+            test_num = 0;
+            
+            while(!isalnum(test_num))
+            {
+                scanf("%c", &test_num);
+            }
             
             printf("test_num = %c, %i\n", test_num, test_num);
         
@@ -223,6 +229,7 @@ STATUS v473_autotest(V473::HANDLE const hw)
     	        default:
     	            break;
 	        }
+	        
         }
         
 
