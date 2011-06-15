@@ -194,6 +194,8 @@ STATUS v473_autotest(V473::HANDLE const hw)
             printf("  Q:  Quit this program\n");
             
             scanf("%c", &test_num);
+            
+            printf("test_num = %c, %i\n", test_num, test_num);
         
 	    
 	        switch(test_num)
