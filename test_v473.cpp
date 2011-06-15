@@ -51,7 +51,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			}
 		}
 		
-		printf("Setting Channel %i PS Enable to 1...\n");
+		printf("Setting Channel %i PS Enable to 1...\n", channel_drive);
 
         hw->enablePowerSupply(lock, channel_drive, true);
         taskDelay(10); // Give card a chance to change outputs and update status
@@ -80,7 +80,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 			}
 		}
 
-		printf("Setting Channel %i PS Enable to 0...\n");
+		printf("Setting Channel %i PS Enable to 0...\n", channel_drive);
         hw->enablePowerSupply(lock, channel_drive, false);
         taskDelay(10); // Give card a chance to change outputs and update status
 	}
@@ -88,7 +88,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 // Toggle PS reset outputs
 	for(channel_drive = 0; channel_drive < 4; channel_drive++)
 	{
-		printf("Sending 1-sec pulse to Channel %i PS Reset to 1...\n");
+		printf("Sending 1-sec pulse to Channel %i PS Reset to 1...\n", channel_drive);
         hw->resetPowerSupply(lock, channel_drive);
 
 // The Reset output is run by the processor's 1sec interrupt cycle
