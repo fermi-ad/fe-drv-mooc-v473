@@ -8,12 +8,15 @@
 #include <string>
 #include <ctype.h>
 
+extern "C" UINT16 sysIn16(UINT16*);
+extern "C" void sysOut16(UINT16*, UINT16);
+
 //------------------------------------------------------------------------------
-// DoTestDiscIO
+// TestDiscIO
 //
 // Automatically do a discrete I/O checkout of the C473 board
 //------------------------------------------------------------------------------
-int DoTestDiscIO(V473::HANDLE const hw)
+int TestDiscIO(V473::HANDLE const hw)
 {
 	uint16_t channel_drive, channel_read;
 
@@ -159,6 +162,99 @@ int DoTestDiscIO(V473::HANDLE const hw)
 	return 0;
 }
 
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+int TestVmeBus(V473::HANDLE const hw)
+{
+    printf("\nVME Bust Test\n");
+    
+    const uint16_t test_pattern[10] = {0x0000,
+                                       0xFFFF,
+                                       0x00FF,
+                                       0xFF00,
+                                       0x0F0F,
+                                       0xF0F0,
+                                       0x3333,
+                                       0xCCCC,
+                                       0x5555,
+                                       0xAAAA};
+    
+    uint16_t expectedData, receivedData;
+    bool testPass = true;
+    
+    vwpp::Lock lock(hw->mutex);
+    uint16_t* dataBuffer = hw->getDataBuffer(lock);
+    
+    // Data Bus Bit Independence
+    printf("\nTesting VME -> Dual Port Data Bus...\n");
+    
+    for(size_t index = 0; index < 10; index++)
+    {
+        sysOut16(dataBuffer+index, test_pattern[index]);
+    }
+                                       
+    for(size_t index = 0; index < 10; index++)
+    {
+        receivedData = sysIn16(dataBuffer+index);
+        
+        printf("Address 0x$04X:  Wrote 0x%04X, Read 0x%04X", index, test_pattern[index], receivedData);
+        
+        if(receivedData != test_pattern[index])
+        {
+            printf(" <- FAIL");
+            testPass = false;
+        }
+        
+        printf("\n");
+    }
+                                       
+    // Address Bus Bit Independence
+    printf("\nTesting VME -> Dual Port Address Bus...\n");
+    
+    sysOut16(dataBuffer+0x7FFA, 0xFFFF); // Load MB Addr reg with an invalid value to keep from stepping on anything
+    
+    for(size_t index = 0; index < 10; index++)
+    {
+        sysOut16(dataBuffer+(test_pattern[index] & 0x7FFE), 0x5555);
+    }
+    
+    for(size_t index = 0; index < 10; index++)
+    {
+        receivedData = sysIn16(dataBuffer+(test_pattern[index] & 0x7FFE));
+        expectedData = 0x5555;
+        
+        printf("Address 0x$04X:  Wrote 0x%04X, Read 0x%04X", (test_pattern[index] & 0x7FFE), expectedData, receivedData);
+        
+        if(receivedData != expectedData)
+        {
+            printf(" <- FAIL");
+            testPass = false;
+        }
+        
+        printf("\n");
+        
+        sysOut16(dataBuffer+(0x0001 << index), 0xAAAA);
+    }
+                                       
+    for(size_t index = 0; index < 10; index++)
+    {
+        receivedData = sysIn16(dataBuffer+(test_pattern[index] & 0x7FFE));
+        expectedData = 0xAAAA;
+        
+        printf("Address 0x$04X:  Wrote 0x%04X, Read 0x%04X", (test_pattern[index] & 0x7FFE), expectedData, receivedData);
+        
+        if(receivedData != expectedData)
+        {
+            printf(" <- FAIL");
+            testPass = false;
+        }
+        
+        printf("\n");
+    }
+                                       
+    return 0;
+}
+
 STATUS v473_autotest(V473::HANDLE const hw)
 {
     try {
@@ -196,24 +292,22 @@ STATUS v473_autotest(V473::HANDLE const hw)
             
             test_num = 0;
             
-            while(!isalnum(test_num))
+            while(!isalnum(test_num)) // Skips over extra line feeds and other characters
             {
                 scanf("%c", &test_num);
             }
             
-            printf("test_num = %c, %i\n", test_num, test_num);
-        
-	    
 	        switch(test_num)
 	        {
     	        case '1':
+    	            TestVmeBus(hw);
     	            break;
     	        
     	        case '2':
     	            break;
     	        
     	        case '3':
-    	            DoTestDiscIO(hw);
+    	            TestDiscIO(hw);
     	            break;
     	        
     	        case '4':
