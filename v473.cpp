@@ -326,6 +326,17 @@ bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 	return false;
 }
 
+bool Card::getFpgaVersion(vwpp::Lock const& lock, uint16_t* const ptr)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    if (readProperty(lock, GEN_ADDR(0, cpFpgaVersion), 1)) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
 bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);

@@ -50,7 +50,7 @@ namespace V473 {
 	    cpTriggerMap = 0x4000, cpTclkInterruptEnable = 0x4200,
 	    cpActiveInterruptLevel = 0x4210, cpLastTclkEvent = 0x4211,
 	    cpInterruptCounter = 0x4220, cpModuleID = 0xff00,
-	    cpFirmwareVersion = 0xff01
+	    cpFirmwareVersion = 0xff01, cpFpgaVersion = 0xff02
 	};
 
 	enum SineMode {
@@ -213,6 +213,7 @@ namespace V473 {
 
 	bool getModuleId(vwpp::Lock const&, uint16_t*);
 	bool getFirmwareVersion(vwpp::Lock const&, uint16_t*);
+	bool getFpgaVersion(vwpp::Lock const&, uint16_t*);
 	bool getActiveRamp(vwpp::Lock const&, uint16_t*);
 	bool getActiveScaleFactor(vwpp::Lock const&, uint16_t*);
 	bool getCurrentSegment(vwpp::Lock const&, uint16_t*);
@@ -348,7 +349,7 @@ extern "C" {
     STATUS v473_destroy(V473::HANDLE);
     STATUS v473_setupInterrupt(int, int, int, int, int, int, int, int, int);
     STATUS v473_test(V473::HANDLE, uint8_t);
-    STATUS v473_autotest(V473::HANDLE, uint8_t);
+    STATUS v473_autotest(V473::HANDLE);
 };
 
 // Local Variables:
