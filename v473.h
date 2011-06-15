@@ -211,6 +211,8 @@ namespace V473 {
 
 	uint16_t getIrqSource() const;
 
+	uint16_t* getDataBuffer(vwpp::Lock const&) { return dataBuffer; }
+
 	bool getModuleId(vwpp::Lock const&, uint16_t*);
 	bool getFirmwareVersion(vwpp::Lock const&, uint16_t*);
 	bool getFpgaVersion(vwpp::Lock const&, uint16_t*);
