@@ -263,16 +263,17 @@ int TestVmeBus(V473::HANDLE const hw)
     }
     
     // V473 Diagnostic Read/Write test
-    printf("Testing Dual Port -> FPGA Data Bus\n");
+    printf("\nTesting Dual Port -> FPGA Data Bus\n");
     
     for(size_t index = 0; index < 10; index++)
     {
         hw->setVmeDataBusDiag(lock, &data_pattern[index]);
+        sysOut16(dataBuffer, ~data_pattern[index]); // Overwrite data pattern to verify CPU really processed it
         
         expectedData = data_pattern[index];
         hw->getVmeDataBusDiag(lock, &receivedData, 1);
         
-        printf("Wrote 0x%04X, Read 0x%04X", addr_pattern[index], expectedData, receivedData);
+        printf("Wrote 0x%04X, Read 0x%04X", expectedData, receivedData);
         
         if(receivedData != expectedData)
         {
