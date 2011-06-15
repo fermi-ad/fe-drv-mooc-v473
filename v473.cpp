@@ -507,7 +507,7 @@ bool Card::getVmeDataBusDiag(vwpp::Lock const& lock,
 }
 
 bool Card::setVmeDataBusDiag(vwpp::Lock const& lock,
-			     uint16_t* const ptr)
+			     uint16_t const* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 

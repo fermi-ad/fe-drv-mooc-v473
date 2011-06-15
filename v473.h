@@ -213,7 +213,7 @@ namespace V473 {
 			     uint16_t* const ptr, uint16_t const n);
 
 	bool setVmeDataBusDiag(vwpp::Lock const& lock,
-			     uint16_t* const ptr);
+			     uint16_t const* const ptr);
 
 	uint16_t getIrqSource() const;
 
