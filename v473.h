@@ -49,8 +49,8 @@ namespace V473 {
 	    cpFinalSineWavePhase = 0xa38, cpCalcOverflow = 0xa39,
 	    cpTriggerMap = 0x4000, cpTclkInterruptEnable = 0x4200,
 	    cpActiveInterruptLevel = 0x4210, cpLastTclkEvent = 0x4211,
-	    cpInterruptCounter = 0x4220, cpModuleID = 0xff00,
-	    cpFirmwareVersion = 0xff01, cpFpgaVersion = 0xff02
+	    cpInterruptCounter = 0x4220, cpVmeDataBusDiag = 0x4484,
+	    cpModuleID = 0xff00, cpFirmwareVersion = 0xff01, cpFpgaVersion = 0xff02
 	};
 
 	enum SineMode {
@@ -208,6 +208,12 @@ namespace V473 {
 	{
 	    return readBank(lock, 0, cpTriggerMap, intLvl, ptr, n);
 	}
+
+	bool getVmeDataBusDiag(vwpp::Lock const& lock,
+			     uint16_t* const ptr, uint16_t const n);
+
+	bool setVmeDataBusDiag(vwpp::Lock const& lock,
+			     uint16_t* const ptr);
 
 	uint16_t getIrqSource() const;
 

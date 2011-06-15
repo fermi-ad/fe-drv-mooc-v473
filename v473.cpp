@@ -493,6 +493,28 @@ bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
     return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1);
 }
 
+bool Card::getVmeDataBusDiag(vwpp::Lock const& lock,
+			     uint16_t* const ptr, uint16_t const n)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    if (readProperty(lock, cpVmeDataBusDiag, n)) {
+	for (uint16_t ii = 0; ii < n; ++ii)
+	    ptr[ii] = sysIn16(dataBuffer + ii);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::setVmeDataBusDiag(vwpp::Lock const& lock,
+			     uint16_t* const ptr)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    sysOut16(dataBuffer, *ptr);
+    return setProperty(lock, cpVmeDataBusDiag, 1);
+}
+
 V473::HANDLE v473_create(int addr, int intVec)
 {
     try {
