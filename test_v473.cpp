@@ -88,7 +88,7 @@ int DoTestDiscIO(V473::HANDLE const hw)
 // Toggle PS reset outputs
 	for(channel_drive = 0; channel_drive < 4; channel_drive++)
 	{
-		printf("Sending 1-sec pulse to Channel %i PS Reset to 1...\n", channel_drive);
+		printf("Sending 1-sec pulse to Channel %i PS Reset...\n", channel_drive);
         hw->resetPowerSupply(lock, channel_drive);
 
 // The Reset output is run by the processor's 1sec interrupt cycle
@@ -177,7 +177,7 @@ STATUS v473_autotest(V473::HANDLE const hw)
 	        printf("Firmware Version = %04X\n", temp);
 	        
     	    hw->getFpgaVersion(lock, &temp);
-	        printf("FPGA Version = %04\n", temp);
+	        printf("FPGA Version = %04X\n", temp);
         }
         
         char test_num = 0;
@@ -211,8 +211,14 @@ STATUS v473_autotest(V473::HANDLE const hw)
     	        case '4':
     	            break;
     	        
+    	        case '5':
+    	            break;
+    	        
     	        case 'Q':
     	            test_num = 'q';
+    	            break;
+    	        
+    	        default:
     	            break;
 	        }
         }
