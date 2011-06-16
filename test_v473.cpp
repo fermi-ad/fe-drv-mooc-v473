@@ -84,9 +84,52 @@ int TestVmeBus(V473::HANDLE const hw)
         sysOut16(dataBuffer+(0x0001 << index), 0xAAAA);
     }
                                        
-    for(size_t index = 0; index < 11; index++)
+    for(size_t index = 0; index < 14; index++)
     {
         receivedData = sysIn16(dataBuffer+(0x0001 << index));
+        expectedData = 0xAAAA;
+        
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (0x0002 << index), expectedData, receivedData);
+        
+        if(receivedData != expectedData)
+        {
+            printf(" <- FAIL");
+            testPass = false;
+        }
+        
+        printf("\n");
+    }
+    
+    // Address Bus Walking 0
+    // Skips address FFFE, because the mailbox mechanism interferes
+    printf("\nTesting VME -> Dual Port Address Bus, Walking 0...\n");
+    
+    for(size_t index = 1; index < 14; index++)
+    {
+        sysOut16(dataBuffer + ~(0x0001 << index), 0x5555);
+    }
+    
+    for(size_t index = 1; index < 14; index++)
+    {
+        receivedData = sysIn16(dataBuffer + ~(0x0001 << index));
+        expectedData = 0x5555;
+        
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", ~(0x0002 << index), expectedData, receivedData);
+        
+        if(receivedData != expectedData)
+        {
+            printf(" <- FAIL");
+            testPass = false;
+        }
+        
+        printf("\n");
+        
+        sysOut16(dataBuffer + ~(0x0001 << index), 0xAAAA);
+    }
+                                       
+    for(size_t index = 1; index < 14; index++)
+    {
+        receivedData = sysIn16(dataBuffer + ~(0x0001 << index));
         expectedData = 0xAAAA;
         
         printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (0x0002 << index), expectedData, receivedData);
