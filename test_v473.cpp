@@ -114,7 +114,7 @@ int TestVmeBus(V473::HANDLE const hw)
         receivedData = sysIn16(dataBuffer + (~(0x0001 << index) & 0x00003FFF));
         expectedData = 0x5555;
         
-        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (~(0x0002 << index) & 0x00003FFF), expectedData, receivedData);
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (~(0x0002 << index) & 0x00007FFE), expectedData, receivedData);
         
         if(receivedData != expectedData)
         {
@@ -132,7 +132,7 @@ int TestVmeBus(V473::HANDLE const hw)
         receivedData = sysIn16(dataBuffer + (~(0x0001 << index) & 0x00003FFF));
         expectedData = 0xAAAA;
         
-        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (~(0x0002 << index) & 0x00003FFF), expectedData, receivedData);
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (~(0x0002 << index) & 0x00007FFE), expectedData, receivedData);
         
         if(receivedData != expectedData)
         {
