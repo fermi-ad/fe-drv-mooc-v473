@@ -229,7 +229,9 @@ int TestDiscIO(V473::HANDLE const hw)
 	const uint16_t ps_stat_mask = 0x24FF;
 	uint16_t ps_stat_expected, ps_stat_received;
 	
-	printf("\nTesting V473 Discrete I/O\n");
+    bool testPass = true;
+
+    printf("\nTesting V473 Discrete I/O\n");
 
     vwpp::Lock lock(hw->mutex);
 
@@ -257,7 +259,7 @@ int TestDiscIO(V473::HANDLE const hw)
     			printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
 				printf("Expected 0x%04X\n", ps_stat_expected);
 				printf("Received 0x%04X\n", ps_stat_received);
-				return 1;
+				testPass = false;
 			}
 		}
 		
@@ -286,7 +288,7 @@ int TestDiscIO(V473::HANDLE const hw)
 				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
 				printf("Expected 0x%04X\n", ps_stat_expected);
 				printf("Received 0x%04X\n", ps_stat_received);
-				return 1;
+				testPass = false;
 			}
 		}
 
@@ -331,7 +333,7 @@ int TestDiscIO(V473::HANDLE const hw)
 				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
 				printf("Expected 0x%04X\n", ps_stat_expected);
 				printf("Received 0x%04X\n", ps_stat_received);
-				return 1;
+				testPass = false;
 			}
         }
 
@@ -357,13 +359,22 @@ int TestDiscIO(V473::HANDLE const hw)
 				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
 				printf("Expected 0x%04X\n", ps_stat_expected);
 				printf("Received 0x%04X\n", ps_stat_received);
-				return 1;
+				testPass = false;
 			}
         }
 
 	}
 	
-	printf("\nV473 Discrete I/O Test PASSED\n");
+	if(testPass)
+	{
+        printf("\nV473 Discrete I/O Test PASSED\n");
+        return 0;
+	}
+	else
+	{
+        printf("\nV473 Discrete I/O Test FAILED\n");
+        return 1;
+	}
 
 	return 0;
 }
