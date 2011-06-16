@@ -12,157 +12,7 @@ extern "C" UINT16 sysIn16(UINT16*);
 extern "C" void sysOut16(UINT16*, UINT16);
 
 //------------------------------------------------------------------------------
-// TestDiscIO
-//
-// Automatically do a discrete I/O checkout of the C473 board
-//------------------------------------------------------------------------------
-int TestDiscIO(V473::HANDLE const hw)
-{
-	uint16_t channel_drive, channel_read;
-
-	const uint16_t ps_stat_mask = 0x24FF;
-	uint16_t ps_stat_expected, ps_stat_received;
-	
-	printf("\nTesting V473 Discrete I/O\n");
-
-    vwpp::Lock lock(hw->mutex);
-
-// Put discrete outputs in a known state
-    printf("Setting all PS Enable/Reset outputs to 0...\n");
-
-	for(channel_drive = 0; channel_drive < 4; channel_drive++)
-	{
-        hw->enablePowerSupply(lock, channel_drive, false);
-	}
-    taskDelay(10); // Give card a chance to change outputs and update status
-
-// Toggle PS enable outputs
-	for(channel_drive = 0; channel_drive < 4; channel_drive++)
-	{
-		for(channel_read = 0; channel_read < 4; channel_read++)
-		{
-    		hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
-
-			ps_stat_received &= ps_stat_mask;
-			ps_stat_expected = 0x00FF;
-
-			if(ps_stat_received != ps_stat_expected)
-			{
-    			printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
-				printf("Expected 0x%04X\n", ps_stat_expected);
-				printf("Received 0x%04X\n", ps_stat_received);
-				return -1;
-			}
-		}
-		
-		printf("Setting Channel %i PS Enable to 1...\n", channel_drive);
-
-        hw->enablePowerSupply(lock, channel_drive, true);
-        taskDelay(10); // Give card a chance to change outputs and update status
-
-		for(channel_read = 0; channel_read < 4; channel_read++)
-		{
-			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
-
-			ps_stat_received &= ps_stat_mask;
-            
-			if(channel_drive == channel_read)
-            {
-    			ps_stat_expected = 0x04FF & ~(0x0001 << (2*channel_drive));
-            }
-            else
-            {
-    			ps_stat_expected = 0x00FF & ~(0x0001 << (2*channel_drive));
-            }
-
-			if(ps_stat_received != ps_stat_expected)
-			{
-				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
-				printf("Expected 0x%04X\n", ps_stat_expected);
-				printf("Received 0x%04X\n", ps_stat_received);
-				return -1;
-			}
-		}
-
-		printf("Setting Channel %i PS Enable to 0...\n", channel_drive);
-        hw->enablePowerSupply(lock, channel_drive, false);
-        taskDelay(10); // Give card a chance to change outputs and update status
-	}
-
-// Toggle PS reset outputs
-	for(channel_drive = 0; channel_drive < 4; channel_drive++)
-	{
-		printf("Sending 1-sec pulse to Channel %i PS Reset...\n", channel_drive);
-        hw->resetPowerSupply(lock, channel_drive);
-
-// The Reset output is run by the processor's 1sec interrupt cycle
-//  It may take up to a second to see the output change.
-        hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
-        
-        while((ps_stat_received & 0x2000) != 0x2000) // Sniff the PS Reset status bit
-        {
-            hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
-        }
-        
-        taskDelay(10); // Give card a chance to change outputs and update status
-        
-        for(channel_read = 0; channel_read < 4; channel_read++)
-        {
-            hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
-			ps_stat_received &= ps_stat_mask;
-            
-            if(channel_drive == channel_read)
-            {
-                ps_stat_expected = 0x20FF & ~(0x0002 << (2*channel_drive));
-            }
-            else
-            {
-                ps_stat_expected = 0x00FF & ~(0x0002 << (2*channel_drive));
-            }
-
-			if(ps_stat_received != ps_stat_expected)
-			{
-				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
-				printf("Expected 0x%04X\n", ps_stat_expected);
-				printf("Received 0x%04X\n", ps_stat_received);
-				return -1;
-			}
-        }
-
-// Wait for the Reset output to turn off
-        hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
-        
-        while((ps_stat_received & 0x2000) != 0x0000) // Sniff the PS Reset status bit
-        {
-            hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
-        }
-        
-        taskDelay(10); // Give card a chance to change outputs and update status
-        
-        for(channel_read = 0; channel_read < 4; channel_read++)
-        {
-            hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
-			ps_stat_received &= ps_stat_mask;
-            
-            ps_stat_expected = 0x00FF;
-
-			if(ps_stat_received != ps_stat_expected)
-			{
-				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
-				printf("Expected 0x%04X\n", ps_stat_expected);
-				printf("Received 0x%04X\n", ps_stat_received);
-				return -1;
-			}
-        }
-
-	}
-	
-	printf("\nDiscrete I/O Test PASSED\n");
-
-	return 0;
-}
-
-//------------------------------------------------------------------------------
+// Perform various read/write tests from the VME Bus
 //------------------------------------------------------------------------------
 int TestVmeBus(V473::HANDLE const hw)
 {
@@ -283,8 +133,208 @@ int TestVmeBus(V473::HANDLE const hw)
         
         printf("\n");
     }
+    
+    // V473 Diagnostic Read - Automatic pattern
+    printf("\nTesting FPGA Automatic Pattern\n");
+    
+    hw->setVmeDataBusDiag(lock, &data_pattern[0]); // One write to prime the pattern
+
+    uint16_t receivedDataBuf[11];
+    hw->getVmeDataBusDiag(lock, receivedDataBuf, 11);
+        
+    expectedData = data_pattern[0];
+    receivedData = receivedDataBuf[0];
+    printf("Wrote 0x%04X, Read 0x%04X", expectedData, receivedData);
+        
+    if(receivedData != expectedData)
+    {
+        printf(" <- FAIL");
+        testPass = false;
+    }
+        
+    printf("\n");
+    
+    printf("Reading automatic pattern...\n");
+    
+    for(size_t index = 0; index < 10; index++)
+    {
+        expectedData = data_pattern[index];
+        receivedData = receivedDataBuf[index+1];
+        
+        printf("Expected 0x%04X, Read 0x%04X", expectedData, receivedData);
+        
+        if(receivedData != expectedData)
+        {
+            printf(" <- FAIL");
+            testPass = false;
+        }
+        
+        printf("\n");
+    }
+    
+    if(testPass)
+    {
+    	printf("\nV473 VME Bus Test PASSED\n");
+        return 0;
+    }
+    else
+    {
+    	printf("\nV473 VME Bus Test FAILED\n");
+        return 1;
+    }
                                        
     return 0;
+}
+
+//------------------------------------------------------------------------------
+// TestDiscIO
+//
+// Automatically do a discrete I/O checkout of the C473 board
+//------------------------------------------------------------------------------
+int TestDiscIO(V473::HANDLE const hw)
+{
+	uint16_t channel_drive, channel_read;
+
+	const uint16_t ps_stat_mask = 0x24FF;
+	uint16_t ps_stat_expected, ps_stat_received;
+	
+	printf("\nTesting V473 Discrete I/O\n");
+
+    vwpp::Lock lock(hw->mutex);
+
+// Put discrete outputs in a known state
+    printf("Setting all PS Enable/Reset outputs to 0...\n");
+
+	for(channel_drive = 0; channel_drive < 4; channel_drive++)
+	{
+        hw->enablePowerSupply(lock, channel_drive, false);
+	}
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Toggle PS enable outputs
+	for(channel_drive = 0; channel_drive < 4; channel_drive++)
+	{
+		for(channel_read = 0; channel_read < 4; channel_read++)
+		{
+    		hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
+
+			ps_stat_received &= ps_stat_mask;
+			ps_stat_expected = 0x00FF;
+
+			if(ps_stat_received != ps_stat_expected)
+			{
+    			printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
+				return 1;
+			}
+		}
+		
+		printf("Setting Channel %i PS Enable to 1...\n", channel_drive);
+
+        hw->enablePowerSupply(lock, channel_drive, true);
+        taskDelay(10); // Give card a chance to change outputs and update status
+
+		for(channel_read = 0; channel_read < 4; channel_read++)
+		{
+			hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
+
+			ps_stat_received &= ps_stat_mask;
+            
+			if(channel_drive == channel_read)
+            {
+    			ps_stat_expected = 0x04FF & ~(0x0001 << (2*channel_drive));
+            }
+            else
+            {
+    			ps_stat_expected = 0x00FF & ~(0x0001 << (2*channel_drive));
+            }
+
+			if(ps_stat_received != ps_stat_expected)
+			{
+				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
+				return 1;
+			}
+		}
+
+		printf("Setting Channel %i PS Enable to 0...\n", channel_drive);
+        hw->enablePowerSupply(lock, channel_drive, false);
+        taskDelay(10); // Give card a chance to change outputs and update status
+	}
+
+// Toggle PS reset outputs
+	for(channel_drive = 0; channel_drive < 4; channel_drive++)
+	{
+		printf("Sending 1-sec pulse to Channel %i PS Reset...\n", channel_drive);
+        hw->resetPowerSupply(lock, channel_drive);
+
+// The Reset output is run by the processor's 1sec interrupt cycle
+//  It may take up to a second to see the output change.
+        hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
+        
+        while((ps_stat_received & 0x2000) != 0x2000) // Sniff the PS Reset status bit
+        {
+            hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
+        }
+        
+        taskDelay(10); // Give card a chance to change outputs and update status
+        
+        for(channel_read = 0; channel_read < 4; channel_read++)
+        {
+            hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
+			ps_stat_received &= ps_stat_mask;
+            
+            if(channel_drive == channel_read)
+            {
+                ps_stat_expected = 0x20FF & ~(0x0002 << (2*channel_drive));
+            }
+            else
+            {
+                ps_stat_expected = 0x00FF & ~(0x0002 << (2*channel_drive));
+            }
+
+			if(ps_stat_received != ps_stat_expected)
+			{
+				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
+				return 1;
+			}
+        }
+
+// Wait for the Reset output to turn off
+        hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
+        
+        while((ps_stat_received & 0x2000) != 0x0000) // Sniff the PS Reset status bit
+        {
+            hw->getPowerSupplyStatus(lock, channel_drive, &ps_stat_received);
+        }
+        
+        taskDelay(10); // Give card a chance to change outputs and update status
+        
+        for(channel_read = 0; channel_read < 4; channel_read++)
+        {
+            hw->getPowerSupplyStatus(lock, channel_read, &ps_stat_received);
+			ps_stat_received &= ps_stat_mask;
+            
+            ps_stat_expected = 0x00FF;
+
+			if(ps_stat_received != ps_stat_expected)
+			{
+				printf("\nDiscIO Error, Reading Channel %i\n", channel_read);
+				printf("Expected 0x%04X\n", ps_stat_expected);
+				printf("Received 0x%04X\n", ps_stat_received);
+				return 1;
+			}
+        }
+
+	}
+	
+	printf("\nV473 Discrete I/O Test PASSED\n");
+
+	return 0;
 }
 
 STATUS v473_autotest(V473::HANDLE const hw)
@@ -316,8 +366,8 @@ STATUS v473_autotest(V473::HANDLE const hw)
             printf("\n");
             printf("Select Procedure:\n");
             printf("  1:  VME Bus Test\n");
-            printf("  2:  Calibration\n");
-            printf("  3:  Discrete I/O Test\n");
+            printf("  2:  Discrete I/O Test\n");
+            printf("  3:  Calibration\n");
             printf("  4:  Analog I/O Test\n");
             printf("  5:  Play Ramps\n");
             printf("  Q:  Quit this program\n");
@@ -336,10 +386,10 @@ STATUS v473_autotest(V473::HANDLE const hw)
     	            break;
     	        
     	        case '2':
+    	            TestDiscIO(hw);
     	            break;
     	        
     	        case '3':
-    	            TestDiscIO(hw);
     	            break;
     	        
     	        case '4':
