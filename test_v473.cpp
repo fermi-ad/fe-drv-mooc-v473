@@ -384,10 +384,17 @@ int TestDiscIO(V473::HANDLE const hw)
 //------------------------------------------------------------------------------
 int Calibrate(V473::HANDLE const hw)
 {
-    unsigned int kb_input = 0;
+    char kb_input = 0;
     
     printf("\nV473 Calibration\n");
+    printf("Press any key to continue, Q to quit\n");
     
+    kb_input = 0;
+    while(!isalnum(kb_input) && (kb_input != ' ')) // Skips over extra line feeds and other characters
+    {
+        scanf("%c", &kb_input);
+    }
+        
     vwpp::Lock lock(hw->mutex);
     hw->tclkTrigEnable(lock, false);
     
@@ -400,7 +407,11 @@ int Calibrate(V473::HANDLE const hw)
         }
         printf("Press any key to continue, Q to quit\n");
         
-        kb_input = getchar();
+        kb_input = 0;
+        while(!isalnum(kb_input) && (kb_input != ' ')) // Skips over extra line feeds and other characters
+        {
+            scanf("%c", &kb_input);
+        }
         
         if((kb_input == (unsigned int) 'q') || (kb_input == (unsigned int) 'Q'))
         {
@@ -414,7 +425,11 @@ int Calibrate(V473::HANDLE const hw)
         }
         printf("Press any key to continue, Q to quit\n");
         
-        kb_input = getchar();
+        kb_input = 0;
+        while(!isalnum(kb_input) && (kb_input != ' ')) // Skips over extra line feeds and other characters
+        {
+            scanf("%c", &kb_input);
+        }
         
         if((kb_input == (unsigned int) 'q') || (kb_input == (unsigned int) 'Q'))
         {
@@ -428,7 +443,11 @@ int Calibrate(V473::HANDLE const hw)
         }
         printf("Press any key to continue, Q to quit\n");
         
-        kb_input = getchar();
+        kb_input = 0;
+        while(!isalnum(kb_input) && (kb_input != ' ')) // Skips over extra line feeds and other characters
+        {
+            scanf("%c", &kb_input);
+        }
         
         if((kb_input == (unsigned int) 'q') || (kb_input == (unsigned int) 'Q'))
         {
