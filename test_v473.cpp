@@ -387,9 +387,8 @@ int Calibrate(V473::HANDLE const hw)
     char kb_input = 0;
     
     printf("\nV473 Calibration\n");
-    printf("Press any key to continue, Q to quit\n");
+    printf("Press any key to continue\n");
     
-    kb_input = 0;
     while(!isalnum(kb_input) && (kb_input != ' ')) // Skips over extra line feeds and other characters
     {
         scanf("%c", &kb_input);
@@ -459,6 +458,206 @@ int Calibrate(V473::HANDLE const hw)
     return 0;
 }
 
+//------------------------------------------------------------------------------
+// Wrap DAC outputs back to ADC inputs and see what we get
+//------------------------------------------------------------------------------
+int TestAnalogIO(V473::HANDLE const hw)
+{
+    bool testPass = true;
+    
+    uint16_t ADCvalue = 0;
+    int ADCvalue_signed = 0;
+    
+    const int tolerance_0V =    50;
+    const int tolerance_5V =   100;
+    const int tolerance_9_5V = 200;
+    
+    printf("\nTesting V473 Analog I/O\n");
+
+    vwpp::Lock lock(hw->mutex);
+
+// Deenergize K1 and K2 to wrap analog outputs to inputs
+    hw->enablePowerSupply(lock, 0, true);
+    hw->enablePowerSupply(lock, 1, true);
+
+// Energize K3 to set bias input to ground
+    hw->enablePowerSupply(lock, 2, false);
+
+// Set all DACs to zero
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near zero
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("DAC output wrapped to ADC input, DAC = 0V\n");
+    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+
+// Set all DACs to 9.5 volts
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0x799A);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near zero
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("DAC output wrapped to ADC input, DAC = 9.5V\n");
+    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+
+// Set all DACs to -9.5 volts
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0x8666);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near zero
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("DAC output wrapped to ADC input, DAC = -9.5V\n");
+    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+
+// Energize K1 and K2 to ground analog inputs
+    hw->enablePowerSupply(lock, 0, false);
+    hw->enablePowerSupply(lock, 1, false);
+
+// Set all DACs to zero
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near zero
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("ADC input grounded, DAC = 0V\n");
+    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+
+// Set all DACs to 9.5 volts
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0x799A);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near 9.5V
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < 31130-tolerance_9_5V) || (ADCvalue_signed > 31130+tolerance_9_5V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("ADC input grounded, DAC = 9.5V\n");
+    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+
+// Set all DACs to -9.5 volts
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0x8666);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near -9.5V
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < -31130-tolerance_9_5V) || (ADCvalue_signed > -31130+tolerance_9_5V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("DAC output wrapped to ADC input, DAC = -9.5V\n");
+    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+
+// Denergize K3 to set bias input to 2.5V
+    hw->enablePowerSupply(lock, 2, true);
+
+// Set all DACs to zero
+    for(size_t channel = 0; channel < 4; channel++)
+    {
+        hw->setDAC(lock, channel, 0);
+    }
+    taskDelay(10); // Give card a chance to change outputs and update status
+
+// Read ADCs - should all be near 5V
+	for(size_t channel = 0; channel < 4; channel++)
+	{
+    	hw->getADC(lock, channel, &ADCvalue);
+    	ADCvalue_signed = (int) ADCvalue;
+		
+		if((ADCvalue_signed < 16334-tolerance_5V) || (ADCvalue_signed > 16434+tolerance_5V))
+		{
+    		printf("\nAnalog Readback Error on channel %i:\n", channel);
+    		printf("ADC input grounded, DAC = 0V, Bias Input = 2.5V\n");
+    		printf("Expected ADC(raw) = 16334, Received %i\n", ADCvalue_signed);
+    		testPass = false;
+		}
+	}
+	
+    if(testPass)
+    {
+    	printf("\nV473 Analog I/O Test PASSED\n");
+        return 0;
+    }
+    else
+    {
+    	printf("\nV473 Analog I/O Test FAILED\n");
+        return 1;
+    }
+
+    return 0;
+}
+
 STATUS v473_autotest(V473::HANDLE const hw)
 {
     try {
@@ -516,6 +715,7 @@ STATUS v473_autotest(V473::HANDLE const hw)
     	            break;
     	        
     	        case '4':
+    	            TestAnalogIO(hw);
     	            break;
     	        
     	        case '5':
