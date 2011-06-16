@@ -106,15 +106,15 @@ int TestVmeBus(V473::HANDLE const hw)
     
     for(size_t index = 1; index < 14; index++)
     {
-        sysOut16(dataBuffer + ~(0x0001 << index), 0x5555);
+        sysOut16(dataBuffer + (~(0x0001 << index) & 0x0000FFFF), 0x5555);
     }
     
     for(size_t index = 1; index < 14; index++)
     {
-        receivedData = sysIn16(dataBuffer + ~(0x0001 << index));
+        receivedData = sysIn16(dataBuffer + (~(0x0001 << index) & 0x0000FFFF));
         expectedData = 0x5555;
         
-        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", ~(0x0002 << index), expectedData, receivedData);
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (~(0x0002 << index) & 0x0000FFFF), expectedData, receivedData);
         
         if(receivedData != expectedData)
         {
@@ -124,15 +124,15 @@ int TestVmeBus(V473::HANDLE const hw)
         
         printf("\n");
         
-        sysOut16(dataBuffer + ~(0x0001 << index), 0xAAAA);
+        sysOut16(dataBuffer + (~(0x0001 << index) & 0x0000FFFF), 0xAAAA);
     }
                                        
     for(size_t index = 1; index < 14; index++)
     {
-        receivedData = sysIn16(dataBuffer + ~(0x0001 << index));
+        receivedData = sysIn16(dataBuffer + (~(0x0001 << index) & 0x0000FFFF));
         expectedData = 0xAAAA;
         
-        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (0x0002 << index), expectedData, receivedData);
+        printf("Address 0x%04X:  Wrote 0x%04X, Read 0x%04X", (~(0x0002 << index) & 0x0000FFFF), expectedData, receivedData);
         
         if(receivedData != expectedData)
         {
