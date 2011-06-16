@@ -447,6 +447,18 @@ bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
     return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), 1);
 }
 
+bool Card::getADC(vwpp::Lock const& lock, uint16_t const chan,
+		  uint16_t* const ptr)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    if (readProperty(lock, GEN_ADDR(chan, cpReadADC), 1)) {
+	*ptr = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
 bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 			   uint16_t* const ptr)
 {
