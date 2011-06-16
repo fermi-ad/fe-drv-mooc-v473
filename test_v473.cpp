@@ -379,6 +379,67 @@ int TestDiscIO(V473::HANDLE const hw)
 	return 0;
 }
 
+//------------------------------------------------------------------------------
+//  Repeatedly set V473 outputs to 0, +10V, and -10V in a loop
+//------------------------------------------------------------------------------
+int Calibrate(V473::HANDLE const hw)
+{
+    unsigned int kb_input = 0;
+    
+    printf("\nV473 Calibration\n");
+    
+    vwpp::Lock lock(hw->mutex);
+    hw->tclkTrigEnable(lock, false);
+    
+    while(1)
+    {
+        printf("\nSetting all DAC Channels to 0V\n");
+        for(size_t channel = 0; channel < 4; channel++)
+        {
+            hw->setDAC(lock, channel, 0);
+        }
+        printf("Press any key to continue, Q to quit\n");
+        
+        kb_input = getchar();
+        
+        if((kb_input == (unsigned int) 'q') || (kb_input == (unsigned int) 'Q'))
+        {
+            return 0;
+        }
+        
+        printf("\nSetting all DAC Channels to +10V\n");
+        for(size_t channel = 0; channel < 4; channel++)
+        {
+            hw->setDAC(lock, channel, 0x7FFF);
+        }
+        printf("Press any key to continue, Q to quit\n");
+        
+        kb_input = getchar();
+        
+        if((kb_input == (unsigned int) 'q') || (kb_input == (unsigned int) 'Q'))
+        {
+            return 0;
+        }
+        
+        printf("\nSetting all DAC Channels to -10V\n");
+        for(size_t channel = 0; channel < 4; channel++)
+        {
+            hw->setDAC(lock, channel, 0x8000);
+        }
+        printf("Press any key to continue, Q to quit\n");
+        
+        kb_input = getchar();
+        
+        if((kb_input == (unsigned int) 'q') || (kb_input == (unsigned int) 'Q'))
+        {
+            return 0;
+        }
+    }
+    
+    
+    return 0;
+}
+
 STATUS v473_autotest(V473::HANDLE const hw)
 {
     try {
@@ -432,6 +493,7 @@ STATUS v473_autotest(V473::HANDLE const hw)
     	            break;
     	        
     	        case '3':
+    	            Calibrate(hw);
     	            break;
     	        
     	        case '4':
