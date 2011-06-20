@@ -613,7 +613,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 		if((ADCvalue_signed < -31130-tolerance_9_5V) || (ADCvalue_signed > -31130+tolerance_9_5V))
 		{
     		printf("\nAnalog Readback Error on channel %i:\n", channel);
-    		printf("DAC output wrapped to ADC input, DAC = -9.5V\n");
+    		printf("ADC input grounded, DAC = -9.5V\n");
     		printf("Expected ADC(raw) = -31130, Received %i\n", ADCvalue_signed);
     		testPass = false;
 		}
