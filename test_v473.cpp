@@ -466,7 +466,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     bool testPass = true;
     
     uint16_t ADCvalue = 0;
-    int ADCvalue_signed = 0;
+    short ADCvalue_signed = 0;
     
     const int tolerance_0V =    50;
     const int tolerance_5V =   100;
@@ -494,7 +494,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
 		{
@@ -516,7 +516,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
 		{
@@ -538,7 +538,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
 		{
@@ -564,7 +564,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < -tolerance_0V) || (ADCvalue_signed > tolerance_0V))
 		{
@@ -586,7 +586,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < 31130-tolerance_9_5V) || (ADCvalue_signed > 31130+tolerance_9_5V))
 		{
@@ -608,7 +608,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < -31130-tolerance_9_5V) || (ADCvalue_signed > -31130+tolerance_9_5V))
 		{
@@ -633,7 +633,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 	for(size_t channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
-    	ADCvalue_signed = (int) ADCvalue;
+    	ADCvalue_signed = (short) ADCvalue;
 		
 		if((ADCvalue_signed < 16334-tolerance_5V) || (ADCvalue_signed > 16434+tolerance_5V))
 		{
