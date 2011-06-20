@@ -592,7 +592,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 		{
     		printf("\nAnalog Readback Error on channel %i:\n", channel);
     		printf("ADC input grounded, DAC = 9.5V\n");
-    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		printf("Expected ADC(raw) = 31130, Received %i\n", ADCvalue_signed);
     		testPass = false;
 		}
 	}
@@ -614,7 +614,7 @@ int TestAnalogIO(V473::HANDLE const hw)
 		{
     		printf("\nAnalog Readback Error on channel %i:\n", channel);
     		printf("DAC output wrapped to ADC input, DAC = -9.5V\n");
-    		printf("Expected ADC(raw) = 0, Received %i\n", ADCvalue_signed);
+    		printf("Expected ADC(raw) = -31130, Received %i\n", ADCvalue_signed);
     		testPass = false;
 		}
 	}
