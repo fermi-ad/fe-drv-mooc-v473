@@ -468,9 +468,9 @@ int TestAnalogIO(V473::HANDLE const hw)
     uint16_t ADCvalue = 0;
     short ADCvalue_signed = 0;
     
-    const int tolerance_0V =    50;
-    const int tolerance_5V =   100;
-    const int tolerance_9_5V = 200;
+    const int tolerance_0V =   100;
+    const int tolerance_5V =   200;
+    const int tolerance_9_5V = 500;
     
     printf("\nTesting V473 Analog I/O\n");
 
@@ -644,6 +644,11 @@ int TestAnalogIO(V473::HANDLE const hw)
 		}
 	}
 	
+// Put the relays back to default positions    
+	hw->enablePowerSupply(lock, 0, false);
+    hw->enablePowerSupply(lock, 1, false);
+    hw->enablePowerSupply(lock, 2, false);
+    
     if(testPass)
     {
     	printf("\nV473 Analog I/O Test PASSED\n");
