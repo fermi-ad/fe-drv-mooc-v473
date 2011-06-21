@@ -488,7 +488,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
 	for(size_t channel = 0; channel < 4; channel++)
@@ -510,7 +510,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0x799A);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
 	for(size_t channel = 0; channel < 4; channel++)
@@ -532,7 +532,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0x8666);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
 	for(size_t channel = 0; channel < 4; channel++)
@@ -558,7 +558,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
 	for(size_t channel = 0; channel < 4; channel++)
@@ -580,7 +580,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0x799A);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near 9.5V
 	for(size_t channel = 0; channel < 4; channel++)
@@ -602,7 +602,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0x8666);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near -9.5V
 	for(size_t channel = 0; channel < 4; channel++)
@@ -627,7 +627,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     {
         hw->setDAC(lock, channel, 0);
     }
-    taskDelay(10); // Give card a chance to change outputs and update status
+    taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near 5V
 	for(size_t channel = 0; channel < 4; channel++)
