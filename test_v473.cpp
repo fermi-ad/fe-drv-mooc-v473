@@ -397,6 +397,11 @@ int Calibrate(V473::HANDLE const hw)
     vwpp::Lock lock(hw->mutex);
     hw->tclkTrigEnable(lock, false);
     
+// Put the relays in default positions    
+	hw->enablePowerSupply(lock, 0, false);
+    hw->enablePowerSupply(lock, 1, false);
+    hw->enablePowerSupply(lock, 2, false);
+    
     while(1)
     {
         printf("\nSetting all DAC Channels to 0V\n");
@@ -475,6 +480,7 @@ int TestAnalogIO(V473::HANDLE const hw)
     printf("\nTesting V473 Analog I/O\n");
 
     vwpp::Lock lock(hw->mutex);
+    hw->tclkTrigEnable(lock, false);
 
 // Deenergize K1 and K2 to wrap analog outputs to inputs
     hw->enablePowerSupply(lock, 0, true);
@@ -663,6 +669,124 @@ int TestAnalogIO(V473::HANDLE const hw)
     return 0;
 }
 
+//------------------------------------------------------------------------------
+// Set up a unique ramp to play on each channel, $0F trigger
+//------------------------------------------------------------------------------
+int PlayRamps(V473::HANDLE const hw)
+{
+	uint16_t data;
+	uint16_t channel;
+	
+	printf("\nSetting up Test Ramps...\n");
+	    
+    vwpp::Lock lock(hw->mutex);
+    hw->tclkTrigEnable(lock, true);
+    
+    // Put the relays in default positions    
+	hw->enablePowerSupply(lock, 0, false);
+    hw->enablePowerSupply(lock, 1, false);
+    hw->enablePowerSupply(lock, 2, false);
+
+    // Set scale factor (1) in each table to unity (256)
+    for(channel = 0; channel < 4; channel++)
+    {
+        data = 0x0100;
+	    hw->setScaleFactors(lock, channel, 0, &data, 1);
+    }
+    
+    // Set scale factor map to select scale factor (1) for Interrupt Level (0)
+    for(channel = 0; channel < 4; channel++)
+    {
+        data = 1;
+	    hw->setScaleFactorMap(lock, channel, 0, &data, 1);
+    }
+    
+    // Set ramp map to select ramp (1) for Interrupt Level (0)
+    for(channel = 0; channel < 4; channel++)
+    {
+        data = 1;
+	    hw->setRampMap(lock, channel, 0, &data, 1);
+    }
+    
+    // Map TCLK event to Interrupt Level (0)
+    uint8_t event = 0x0F;
+    hw->setTriggerMap(lock, 0, &event, 1);
+    
+    uint16_t Buffer[16];
+        
+    // Send ramp 1 data, channel 0
+    Buffer[0*2    ] = (uint16_t)  30000;
+    Buffer[0*2 + 1] = (uint16_t)   1000;
+    Buffer[1*2    ] = (uint16_t)  30000;
+    Buffer[1*2 + 1] = (uint16_t)   1000;
+    Buffer[2*2    ] = (uint16_t)      0;
+    Buffer[2*2 + 1] = (uint16_t)   1000;
+    Buffer[3*2    ] = (uint16_t) -30000;
+    Buffer[3*2 + 1] = (uint16_t)   1000;
+    Buffer[4*2    ] = (uint16_t) -30000;
+    Buffer[4*2 + 1] = (uint16_t)   1000;
+    Buffer[5*2    ] = (uint16_t)      0;
+    Buffer[5*2 + 1] = (uint16_t)   1000;
+    Buffer[6*2    ] = (uint16_t)      0;
+    Buffer[6*2 + 1] = (uint16_t)      0;
+	hw->setRamp(lock, 0, 1, 0, Buffer, 14);
+        
+    // Send ramp 1 data, channel 1
+    Buffer[0*2    ] = (uint16_t) -30000;
+    Buffer[0*2 + 1] = (uint16_t)   1000;
+    Buffer[1*2    ] = (uint16_t) -30000;
+    Buffer[1*2 + 1] = (uint16_t)   1000;
+    Buffer[2*2    ] = (uint16_t)      0;
+    Buffer[2*2 + 1] = (uint16_t)   1000;
+    Buffer[3*2    ] = (uint16_t)  30000;
+    Buffer[3*2 + 1] = (uint16_t)   1000;
+    Buffer[4*2    ] = (uint16_t)  30000;
+    Buffer[4*2 + 1] = (uint16_t)   1000;
+    Buffer[5*2    ] = (uint16_t)      0;
+    Buffer[5*2 + 1] = (uint16_t)   1000;
+    Buffer[6*2    ] = (uint16_t)      0;
+    Buffer[6*2 + 1] = (uint16_t)      0;
+	hw->setRamp(lock, 1, 1, 0, Buffer, 14);
+        
+    // Send ramp 1 data, channel 2
+    Buffer[0*2    ] = (uint16_t)  30000;
+    Buffer[0*2 + 1] = (uint16_t)   1000;
+    Buffer[1*2    ] = (uint16_t)  30000;
+    Buffer[1*2 + 1] = (uint16_t)   1000;
+    Buffer[2*2    ] = (uint16_t)      0;
+    Buffer[2*2 + 1] = (uint16_t)   1000;
+    Buffer[3*2    ] = (uint16_t)  30000;
+    Buffer[3*2 + 1] = (uint16_t)   1000;
+    Buffer[4*2    ] = (uint16_t)  30000;
+    Buffer[4*2 + 1] = (uint16_t)   1000;
+    Buffer[5*2    ] = (uint16_t)      0;
+    Buffer[5*2 + 1] = (uint16_t)   1000;
+    Buffer[6*2    ] = (uint16_t)      0;
+    Buffer[6*2 + 1] = (uint16_t)      0;
+	hw->setRamp(lock, 2, 1, 0, Buffer, 14);
+        
+    // Send ramp 1 data, channel 3
+    Buffer[0*2    ] = (uint16_t) -30000;
+    Buffer[0*2 + 1] = (uint16_t)   1000;
+    Buffer[1*2    ] = (uint16_t) -30000;
+    Buffer[1*2 + 1] = (uint16_t)   1000;
+    Buffer[2*2    ] = (uint16_t)      0;
+    Buffer[2*2 + 1] = (uint16_t)   1000;
+    Buffer[3*2    ] = (uint16_t) -30000;
+    Buffer[3*2 + 1] = (uint16_t)   1000;
+    Buffer[4*2    ] = (uint16_t) -30000;
+    Buffer[4*2 + 1] = (uint16_t)   1000;
+    Buffer[5*2    ] = (uint16_t)      0;
+    Buffer[5*2 + 1] = (uint16_t)   1000;
+    Buffer[6*2    ] = (uint16_t)      0;
+    Buffer[6*2 + 1] = (uint16_t)      0;
+	hw->setRamp(lock, 3, 1, 0, Buffer, 14);
+	
+	printf("Ramp setup complete\n");
+	
+	return 0;
+}
+    
 STATUS v473_autotest(V473::HANDLE const hw)
 {
     try {
@@ -724,6 +848,7 @@ STATUS v473_autotest(V473::HANDLE const hw)
     	            break;
     	        
     	        case '5':
+    	            PlayRamps(hw);
     	            break;
     	        
     	        case 'Q':
