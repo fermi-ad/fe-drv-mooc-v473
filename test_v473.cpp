@@ -385,6 +385,7 @@ int TestDiscIO(V473::HANDLE const hw)
 int Calibrate(V473::HANDLE const hw)
 {
     char kb_input = 0;
+    uint16_t channel = 0;
     
     printf("\nV473 Calibration\n");
     printf("Press any key to continue\n");
@@ -405,7 +406,7 @@ int Calibrate(V473::HANDLE const hw)
     while(1)
     {
         printf("\nSetting all DAC Channels to 0V\n");
-        for(size_t channel = 0; channel < 4; channel++)
+        for(channel = 0; channel < 4; channel++)
         {
             hw->setDAC(lock, channel, 0);
         }
@@ -423,7 +424,7 @@ int Calibrate(V473::HANDLE const hw)
         }
         
         printf("\nSetting all DAC Channels to +10V\n");
-        for(size_t channel = 0; channel < 4; channel++)
+        for(channel = 0; channel < 4; channel++)
         {
             hw->setDAC(lock, channel, 0x7FFF);
         }
@@ -441,7 +442,7 @@ int Calibrate(V473::HANDLE const hw)
         }
         
         printf("\nSetting all DAC Channels to -10V\n");
-        for(size_t channel = 0; channel < 4; channel++)
+        for(channel = 0; channel < 4; channel++)
         {
             hw->setDAC(lock, channel, 0x8000);
         }
@@ -469,6 +470,7 @@ int Calibrate(V473::HANDLE const hw)
 int TestAnalogIO(V473::HANDLE const hw)
 {
     bool testPass = true;
+    uint16_t channel = 0;
     
     uint16_t ADCvalue = 0;
     short ADCvalue_signed = 0;
@@ -490,14 +492,14 @@ int TestAnalogIO(V473::HANDLE const hw)
     hw->enablePowerSupply(lock, 2, false);
 
 // Set all DACs to zero
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
@@ -512,14 +514,14 @@ int TestAnalogIO(V473::HANDLE const hw)
 	}
 
 // Set all DACs to 9.5 volts
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0x799A);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
@@ -534,14 +536,14 @@ int TestAnalogIO(V473::HANDLE const hw)
 	}
 
 // Set all DACs to -9.5 volts
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0x8666);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
@@ -560,14 +562,14 @@ int TestAnalogIO(V473::HANDLE const hw)
     hw->enablePowerSupply(lock, 1, false);
 
 // Set all DACs to zero
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near zero
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
@@ -582,14 +584,14 @@ int TestAnalogIO(V473::HANDLE const hw)
 	}
 
 // Set all DACs to 9.5 volts
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0x799A);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near 9.5V
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
@@ -604,14 +606,14 @@ int TestAnalogIO(V473::HANDLE const hw)
 	}
 
 // Set all DACs to -9.5 volts
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0x8666);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near -9.5V
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
@@ -629,14 +631,14 @@ int TestAnalogIO(V473::HANDLE const hw)
     hw->enablePowerSupply(lock, 2, true);
 
 // Set all DACs to zero
-    for(size_t channel = 0; channel < 4; channel++)
+    for(channel = 0; channel < 4; channel++)
     {
         hw->setDAC(lock, channel, 0);
     }
     taskDelay(30); // Give card a chance to change outputs and update status
 
 // Read ADCs - should all be near 5V
-	for(size_t channel = 0; channel < 4; channel++)
+	for(channel = 0; channel < 4; channel++)
 	{
     	hw->getADC(lock, channel, &ADCvalue);
     	ADCvalue_signed = (short) ADCvalue;
