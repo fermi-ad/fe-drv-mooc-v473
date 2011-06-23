@@ -220,7 +220,19 @@ int TestVmeBus(V473::HANDLE const hw)
 //------------------------------------------------------------------------------
 // TestDiscIO
 //
-// Automatically do a discrete I/O checkout of the C473 board
+// Automatically do a discrete I/O checkout of the V473 board
+//
+// V473 is connected to a loopback box with the following connections:
+//  (all channels, inputs, and outputs counted from zero)
+//
+//  PS0 Enable -> All channels status input 0
+//  PS0 Reset  -> All channels status input 1
+//  PS1 Enable -> All channels status input 2
+//  PS1 Reset  -> All channels status input 3
+//  PS2 Enable -> All channels status input 4
+//  PS2 Reset  -> All channels status input 5
+//  PS3 Enable -> All channels status input 6
+//  PS3 Reset  -> All channels status input 7
 //------------------------------------------------------------------------------
 int TestDiscIO(V473::HANDLE const hw)
 {
@@ -466,6 +478,15 @@ int Calibrate(V473::HANDLE const hw)
 
 //------------------------------------------------------------------------------
 // Wrap DAC outputs back to ADC inputs and see what we get
+//
+//  V473 is connected to a loopback box with control relays
+//
+//  PS0 Enable output low  = ADC 0, ADC 1 inputs grounded
+//  PS0 Enable output high = DAC 0 wrapped to ADC 0, DAC 1 wrapped to ADC 1
+//  PS1 Enable output low  = ADC 2, ADC 3 inputs grounded
+//  PS1 Enable output high = DAC 2 wrapped to ADC 2, DAC 3 wrapped to ADC 3
+//  PS2 Enable output low  = All bias inputs open
+//  PS2 Enable output high = All bias inputs connected to 2.5V (adds 5.0V to all DAC outputs)
 //------------------------------------------------------------------------------
 int TestAnalogIO(V473::HANDLE const hw)
 {
