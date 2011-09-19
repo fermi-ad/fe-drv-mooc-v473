@@ -7,6 +7,7 @@
 #include <iv.h>
 #include <intLib.h>
 #include <taskLib.h>
+#include <rebootLib.h>
 #include <cstdio>
 #include <cassert>
 
@@ -117,7 +118,6 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     sysOut16(irqStatus, intVec);
     printf("here\n");
     taskDelay(60);
-    sysIntEnable(1);
 }
 
 Card::~Card()
