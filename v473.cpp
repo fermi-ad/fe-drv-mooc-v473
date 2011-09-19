@@ -116,8 +116,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     sysOut16(irqSource, 0xffff);
     sysOut16(irqMask, 0xd21f);
     sysOut16(irqStatus, intVec);
-    printf("here\n");
-    taskDelay(60);
+    taskDelay(20);
 }
 
 Card::~Card()
