@@ -895,7 +895,7 @@ STATUS v473_create_mooc_instance(unsigned short const oid,
 	if (ptr.get()) {
 	    if (create_instance(oid, cls, ptr.get(), "V473") != NOERR)
 		throw std::runtime_error("problem creating an instance");
-	    instance_is_reentrant(oid);
+	    // instance_is_reentrant(oid);
 	    printf("New instance of V473 created. Underlying object @ %p.\n",
 		   ptr.release());
 	}
