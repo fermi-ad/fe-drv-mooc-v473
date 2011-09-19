@@ -45,8 +45,8 @@ bool Card::detect(vwpp::Lock const&)
 
     if (sysIn16(readWrite) == 2 && sysIn16(count) == 1 &&
 	sysIn16(dataBuffer) == 473) {
-	*irqEnable = 0;
-	*irqSource = 0xffff;
+	sysOut16(irqEnable, 0);
+	sysOut16(irqSource, 0xffff);
 	return true;
     } else
 	return false;
