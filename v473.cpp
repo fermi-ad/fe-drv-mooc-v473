@@ -43,8 +43,13 @@ bool Card::detect(vwpp::Lock const&)
     sysOut16(readWrite, 0);
     taskDelay(2);
 
-    return sysIn16(readWrite) == 2 && sysIn16(count) == 1 &&
-	sysIn16(dataBuffer) == 473;
+    if (sysIn16(readWrite) == 2 && sysIn16(count) == 1 &&
+	sysIn16(dataBuffer) == 473) {
+	*irqEnable = 0;
+	*irqSource = 0xffff;
+	return true;
+    } else
+	return false;
 }
 
 Card::Card(uint8_t addr, uint8_t intVec) :
@@ -107,10 +112,10 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 	throw std::runtime_error("cannot connect V473 hardware to interrupt "
 				 "vector");
 
-    sysIntEnable(1);
-    sysOut16(irqStatus, intVec);
     sysOut16(irqSource, 0xffff);
     sysOut16(irqMask, 0xd21f);
+    sysOut16(irqStatus, intVec);
+    sysIntEnable(1);
 }
 
 Card::~Card()
@@ -457,6 +462,27 @@ bool Card::getADC(vwpp::Lock const& lock, uint16_t const chan,
 	return true;
     } else
 	return false;
+}
+
+bool Card::getDACUpdateRate(vwpp::Lock const& lock, uint16_t const chan,
+			    uint16_t* const result)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    if (readProperty(lock, GEN_ADDR(chan, cpDACUpdateRate), 1)) {
+	*result = sysIn16(dataBuffer);
+	return true;
+    } else
+	return false;
+}
+
+bool Card::setDACUpdateRate(vwpp::Lock const& lock, uint16_t const chan,
+			    uint16_t const val)
+{
+    assert(sysIn16(readWrite) & 2);
+
+    sysOut16(dataBuffer, val);
+    return setProperty(lock, GEN_ADDR(chan, cpDACUpdateRate), 1);
 }
 
 bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,

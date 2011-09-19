@@ -262,6 +262,9 @@ namespace V473 {
 	bool enablePowerSupply(vwpp::Lock const&, uint16_t, bool);
 	bool resetPowerSupply(vwpp::Lock const&, uint16_t);
 
+	bool getDACUpdateRate(vwpp::Lock const&, uint16_t, uint16_t*);
+	bool setDACUpdateRate(vwpp::Lock const&, uint16_t, uint16_t);
+
 	bool getSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t*);
 	bool setSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t);
 	bool setDelays(vwpp::Lock const& lock, uint16_t const chan,
