@@ -63,6 +63,8 @@ Card::Card(uint8_t addr, uint8_t intVec) :
 				   &baseAddr))
 	throw std::runtime_error("illegal A24 VME address");
 
+    logInform1(hLog, "Looking for V473 at address %p", baseAddr);
+
     // Compute the memory-mapped registers based upon the computed
     // base address.
 
