@@ -17,7 +17,7 @@ static float clip(float val, float limit)
 }
 
 int v473_eye = 2;
-int v473_delta = 300;
+int v473_delta = 400;
 int v473_rotx = 3;
 int v473_roty = 3;
 int v473_rotz = 3;
