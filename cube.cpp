@@ -17,7 +17,7 @@ static float clip(float val, float limit)
 }
 
 int v473_eye = 2;
-int v473_delta = 400;
+int v473_delta = 50;
 int v473_rotx = 3;
 int v473_roty = 3;
 int v473_rotz = 3;
@@ -169,7 +169,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    hw->setOffsetMap(lock, 1, 1, &data, 1);
 	    hw->tclkTrigEnable(lock, true);
 
-	    uint8_t const event = 0x0f;
+	    uint8_t const event = 0x07;
 
 	    hw->setTriggerMap(lock, 0, &event, 1);
 
