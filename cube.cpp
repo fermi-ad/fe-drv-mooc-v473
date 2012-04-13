@@ -228,8 +228,8 @@ STATUS v473_cube(V473::HANDLE const hw)
 		data[0][(ii + 1) * 2 + 1] = data[1][(ii + 1) * 2 + 1] = 0;
 	    }
 
+	    vwpp::Lock lock(hw->mutex);
 	    {
-		vwpp::Lock lock(hw->mutex);
 		uint8_t const unevent = 0xfe;
 
 		hw->setTriggerMap(lock, !ramp, &unevent, 1);
@@ -248,8 +248,8 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    // Wait for the ramp to start to play. Then we can switch
 	    // to updating the other ramp.
 
-	    // while (hw->getActiveInterruptLevel(lock) == ramp)
-	    taskDelay(4);
+	    while (hw->getActiveInterruptLevel(lock) == ramp)
+		taskDelay(1);
 	    ramp = !ramp;
 	} while (true);
     }
