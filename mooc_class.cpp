@@ -670,9 +670,10 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		     uint16_t const val =
 			 *(uint16_t const*)((uint8_t const*)req->data + ii) & 0xff;
 
-		     for (size_t jj = 0; jj < 256; ++jj)
-			 if (val == (curr[jj] & 0xff))
-			     return ERR_BADSET;
+		     if (val != 0x00fe)
+			 for (size_t jj = 0; jj < 256; ++jj)
+			     if (val == (curr[jj] & 0xff))
+				 return ERR_BADSET;
 		 }
 
 		 if (!(*obj)->setTriggerMap(lock, 0, req->OFFSET / 2,
