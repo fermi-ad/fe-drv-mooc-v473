@@ -3,7 +3,7 @@
 #include <vxWorks.h>
 #include <cstdio>
 #include <memory>
-#include <mooc++-4.2.h>
+#include <mooc++-4.1.h>
 #include "v473.h"
 
 int v473_lock_tmo = 1500;
