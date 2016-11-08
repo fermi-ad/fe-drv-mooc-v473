@@ -1,4 +1,4 @@
-Announcing v1.5 of V473
+Announcing v1.6 of V473
 MOOC driver for V473 Ramp Card
 
 The V473 is a VME-based programmable ramp controller capable of generating four
@@ -10,9 +10,9 @@ supplies.
 
 	Online info: http://www-bd.fnal.gov/issues/wiki/V473
 
-Notes About v1.5:
+Notes About v1.6:
 
-    - This build is compiled against MOOC 4.3.
+    - This build is compiled against MOOC 4.6.
 
 Location
 
@@ -22,19 +22,15 @@ Location
 
     BSP        VxWorks    File
 
-    mv2303     5.5        vxworks_boot/v5.5/module/mv2303/v473-1.5.out
-    mv2401     5.5        vxworks_boot/v5.5/module/mv2401/v473-1.5.out
-    mv2434     5.5        vxworks_boot/v5.5/module/mv2434/v473-1.5.out
-    mv5500     5.5        vxworks_boot/v5.5/module/mv5500/v473-1.5.out
+    mv2303     5.5        vxworks_boot/v5.5/module/mv2303/v473-1.6.out
+    mv2401     5.5        vxworks_boot/v5.5/module/mv2401/v473-1.6.out
+    mv2434     5.5        vxworks_boot/v5.5/module/mv2434/v473-1.6.out
+    mv5500     5.5        vxworks_boot/v5.5/module/mv5500/v473-1.6.out
 
-    mv2401     6.1        vxworks_boot/v6.1/module/mv2401/v473-1.5.out
-    mv2434     6.1        vxworks_boot/v6.1/module/mv2434/v473-1.5.out
-    mv5500     6.1        vxworks_boot/v6.1/module/mv5500/v473-1.5.out
+    mv2401     6.4        vxworks_boot/v6.4/module/mv2401/v473-1.6.out
+    mv2434     6.4        vxworks_boot/v6.4/module/mv2434/v473-1.6.out
+    mv5500     6.4        vxworks_boot/v6.4/module/mv5500/v473-1.6.out
 
-    mv2401     6.4        vxworks_boot/v6.4/module/mv2401/v473-1.5.out
-    mv2434     6.4        vxworks_boot/v6.4/module/mv2434/v473-1.5.out
-    mv5500     6.4        vxworks_boot/v6.4/module/mv5500/v473-1.5.out
-
-    mv2401     6.7        vxworks_boot/v6.7/module/mv2401/v473-1.5.out
-    mv2434     6.7        vxworks_boot/v6.7/module/mv2434/v473-1.5.out
-    mv5500     6.7        vxworks_boot/v6.7/module/mv5500/v473-1.5.out
+    mv2401     6.7        vxworks_boot/v6.7/module/mv2401/v473-1.6.out
+    mv2434     6.7        vxworks_boot/v6.7/module/mv2434/v473-1.6.out
+    mv5500     6.7        vxworks_boot/v6.7/module/mv5500/v473-1.6.out

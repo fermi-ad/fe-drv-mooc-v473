@@ -1,6 +1,6 @@
 # $Id$
 
-VID = 1.5
+VID = 1.6
 PRODUCT = 1
 
 SUPPORTED_VERSIONS = 55 64 67
