@@ -255,7 +255,7 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
     return intDone.wait(40) && lastCmdOkay;
 }
 
-bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::readBank(vwpp::Lock const& lock, Channel const& chan,
 		    ChannelProperty const prop, uint16_t const start,
 		    uint16_t* const ptr, uint16_t const n)
 {
@@ -275,7 +275,7 @@ bool Card::readBank(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
-bool Card::writeBank(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::writeBank(vwpp::Lock const& lock, Channel const& chan,
 		     ChannelProperty const prop, uint16_t const start,
 		     uint16_t const* const ptr, uint16_t const n)
 {

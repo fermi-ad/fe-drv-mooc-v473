@@ -1,7 +1,6 @@
 #include <vxWorks.h>
 #include <cstdio>
 #include <memory>
-#include <mooc++-4.6.h>
 #include "v473.h"
 
 int v473_lock_tmo = 1500;
@@ -51,16 +50,18 @@ static void term(void)
 
 // This function initializes an instance of the MOOC V473 class.
 
-STATUS objectInit(short const oid, V473::Card* const ptr, void const*,
-	       V473::Card** const ivs)
+STATUS objectInit(short, V473::Card* const ptr, void const*,
+		  V473::Card** const ivs)
 {
     *ivs = ptr;
     return OK;
 }
 
-typedef bool (V473::Card::*STableReadCallback)(vwpp::Lock const&, uint16_t,
+typedef bool (V473::Card::*STableReadCallback)(vwpp::Lock const&,
+					       V473::Card::Channel const&,
 					       uint16_t, uint16_t*, uint16_t);
-typedef bool (V473::Card::*STableWriteCallback)(vwpp::Lock const&, uint16_t,
+typedef bool (V473::Card::*STableWriteCallback)(vwpp::Lock const&,
+						V473::Card::Channel const&,
 						uint16_t, uint16_t const*,
 						uint16_t);
 
@@ -317,6 +318,9 @@ static STATUS devReading(short, RS_REQ const* const req, void* const rep,
 	}
 	return NOERR;
     }
+    catch (int16_t const& e) {
+	return e;
+    }
     catch (std::exception const& e) {
 	printf("%s: exception '%s'\n", __func__, e.what());
 	return ERR_DEVICEERROR;
@@ -477,6 +481,9 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 	    return ERR_UNSUPMT;
 	}
 	return NOERR;
+    }
+    catch (int16_t const& e) {
+	return e;
     }
     catch (std::exception const& e) {
 	printf("%s: exception '%s'\n", __func__, e.what());
@@ -686,6 +693,9 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 	}
 	return NOERR;
     }
+    catch (int16_t const& e) {
+	return e;
+    }
     catch (std::exception const& e) {
 	printf("%s: exception '%s'\n", __func__, e.what());
 	return ERR_DEVICEERROR;
@@ -783,6 +793,9 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 	}
 	return result ? NOERR : ERR_MISBOARD;
     }
+    catch (int16_t const& e) {
+	return e;
+    }
     catch (std::exception const& e) {
 	printf("%s: exception '%s'\n", __func__, e.what());
 	return ERR_DEVICEERROR;
@@ -870,6 +883,9 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 	    return ERR_UNSUPMT;
 	}
 	return NOERR;
+    }
+    catch (int16_t const& e) {
+	return e;
     }
     catch (std::exception const& e) {
 	printf("%s: exception '%s'\n", __func__, e.what());
