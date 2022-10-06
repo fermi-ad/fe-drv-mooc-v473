@@ -1,5 +1,3 @@
-// $Id$
-
 #include "v473.h"
 #include <errlogLib-2.0.h>
 #include <vme.h>

@@ -1,5 +1,3 @@
-// $Id$
-
 #include "v473.h"
 #include <cmath>
 #include <taskLib.h>

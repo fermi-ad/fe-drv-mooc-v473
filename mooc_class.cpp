@@ -1,5 +1,3 @@
-// $Id$
-
 #include <vxWorks.h>
 #include <cstdio>
 #include <memory>

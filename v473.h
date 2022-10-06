@@ -1,5 +1,3 @@
-// $Id$
-
 #include <vxWorks.h>
 #include <stdexcept>
 #include <vwpp-1.0.h>
