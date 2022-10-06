@@ -7,7 +7,7 @@ MOD_TARGETS = v473.out v473-dan.out
 MOD_64_TARGETS = v473-cube.out
 MOD_67_TARGETS = v473-cube.out
 
-include ${PRODUCTS_INCDIR}frontend-2.4.mk
+include ${PRODUCTS_INCDIR}frontend-3.1.mk
 
 v473.o cube.o mooc_class.o test_v473.o : v473.h
 
