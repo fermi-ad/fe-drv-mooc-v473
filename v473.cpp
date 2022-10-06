@@ -259,15 +259,11 @@ bool Card::readBank(vwpp::Lock const& lock, Channel const& chan,
 		    ChannelProperty const prop, uint16_t const start,
 		    uint16_t* const ptr, uint16_t const n)
 {
-    if (prop == cpTriggerMap) {
-	if (start >= 256)
-	    throw std::logic_error("interrupt level out of range");
-    } else if (start >= 32)
-	    throw std::logic_error("interrupt level out of range");
+    IntLevel const il(start, prop);
 
     assert(sysIn16(readWrite) & 2);
 
-    if (readProperty(lock, GEN_ADDR(chan, prop, start), n)) {
+    if (readProperty(lock, GEN_ADDR(chan, il), n)) {
 	for (uint16_t ii = 0; ii < n; ++ii)
 	    ptr[ii] = sysIn16(dataBuffer + ii);
 	return true;
@@ -279,17 +275,13 @@ bool Card::writeBank(vwpp::Lock const& lock, Channel const& chan,
 		     ChannelProperty const prop, uint16_t const start,
 		     uint16_t const* const ptr, uint16_t const n)
 {
-    if (prop == cpTriggerMap) {
-	if (start >= 256)
-	    throw std::logic_error("interrupt level out of range");
-    } else if (start >= 32)
-	    throw std::logic_error("interrupt level out of range");
+    IntLevel const il(start, prop);
 
     assert(sysIn16(readWrite) & 2);
 
     for (uint16_t ii = 0; ii < n; ++ii)
 	sysOut16(dataBuffer + ii, ptr[ii]);
-    return setProperty(lock, GEN_ADDR(chan, prop, start), n);
+    return setProperty(lock, GEN_ADDR(chan, il), n);
 }
 
 bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,

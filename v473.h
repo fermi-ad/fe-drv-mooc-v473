@@ -102,19 +102,43 @@ namespace V473 {
 	    smSweepLoop = 7
 	};
 
+	// Create a class that wraps a `size_t` type to represent an
+	// interrupt level. If an instance can be created, it will hold
+	// a valid value.
+
+	class IntLevel {
+	    size_t const value;
+	    ChannelProperty const pvalue;
+
+	    IntLevel();
+
+	 public:
+	    IntLevel(size_t const v, ChannelProperty const& p) :
+		value((p == cpTriggerMap && v < 256) ||
+		      (p != cpTriggerMap && v < 32) ?
+		      v : throw int16_t(ERR_BADSLOT)),
+		pvalue(p)
+	    {}
+
+	    size_t level() const { return value; }
+	    size_t prop() const { return pvalue; }
+	};
+
 	// Most addresses in the V473 memory map have the same bit
 	// layout, so this function computes the address for a
 	// channel's property with an optional interrupt level.
 
-	uint16_t GEN_ADDR(Channel const& chan, ChannelProperty const prop,
-			  uint16_t const intLvl = 0) const
+	uint16_t GEN_ADDR(Channel const& chan, IntLevel const& intLvl) const
 	{
-	    if (prop == cpTriggerMap) {
-		if (intLvl >= 256)
-		    throw std::logic_error("interrupt level out of range");
-	    } else if (intLvl >= 32)
-		throw std::logic_error("interrupt level out of range");
-	    return 0x1000 * chan + prop + intLvl;
+	    return 0x1000 * chan + intLvl.prop() + intLvl.level();
+	}
+
+	uint16_t GEN_ADDR(Channel const& chan,
+			  ChannelProperty const& prop) const
+	{
+	    IntLevel const intLvl(0, prop);
+
+	    return 0x1000 * chan + intLvl.prop() + intLvl.level();
 	}
 
 	// These functions set up the transaction registers.
