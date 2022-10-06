@@ -7,7 +7,10 @@ control capabilities to turn on, turn off, and reset four power
 supplies. It can also return eight status bits, a ramp enable bit, and
 a power supply enable bit from each of the regulator supplies.
 
-	Online info: http://www-bd.fnal.gov/issues/wiki/V473
+This hardware is the same as is used in the C473 CAMAC card. However,
+this card uses the VME bus so it can be updated much faster. In fact,
+being able to update the ramp tables at 15 Hz allowed [this
+demo](https://youtu.be/gS6GUzcsVGY) to be created.
 
 # Using this Driver
 
