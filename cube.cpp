@@ -135,7 +135,7 @@ STATUS v473_cube(V473::HANDLE const hw)
 	    // Setup the hardware
 
 	    uint16_t data;
-	    vwpp::Lock lock(hw->mutex);
+	    V473::Card::LockType lock(hw);
 
 	    hw->waveformEnable(lock, 0, false);
 	    hw->waveformEnable(lock, 1, false);
@@ -226,7 +226,8 @@ STATUS v473_cube(V473::HANDLE const hw)
 		data[0][(ii + 1) * 2 + 1] = data[1][(ii + 1) * 2 + 1] = 0;
 	    }
 
-	    vwpp::Lock lock(hw->mutex);
+	    V473::Card::LockType lock(hw);
+
 	    {
 		uint8_t const unevent = 0xfe;
 

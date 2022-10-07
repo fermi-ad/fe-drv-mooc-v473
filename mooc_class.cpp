@@ -57,10 +57,10 @@ STATUS objectInit(short, V473::Card* const ptr, void const*,
     return OK;
 }
 
-typedef bool (V473::Card::*STableReadCallback)(vwpp::Lock const&,
+typedef bool (V473::Card::*STableReadCallback)(V473::Card::LockType const&,
 					       V473::Card::Channel const&,
 					       uint16_t, uint16_t*, uint16_t);
-typedef bool (V473::Card::*STableWriteCallback)(vwpp::Lock const&,
+typedef bool (V473::Card::*STableWriteCallback)(V473::Card::LockType const&,
 						V473::Card::Channel const&,
 						uint16_t, uint16_t const*,
 						uint16_t);
@@ -81,7 +81,7 @@ static STATUS readSimpleTable(RS_REQ const* const req, size_t const entrySize,
     if (req->OFFSET + req->ILEN > maxSize)
 	return ERR_BADOFLEN;
 
-    vwpp::Lock lock(obj->mutex, v473_lock_tmo);
+    V473::Card::LockType lock(obj, v473_lock_tmo);
 
     if (!(obj->*mt)(lock, REQ_TO_453CHAN(req), req->OFFSET / entrySize,
 		    ptr, req->ILEN / entrySize))
@@ -103,7 +103,7 @@ static STATUS writeSimpleTable(RS_REQ const* const req, size_t const entrySize,
     if (req->OFFSET + req->ILEN > maxSize)
 	return ERR_BADOFLEN;
 
-    vwpp::Lock lock(obj->mutex, v473_lock_tmo);
+    V473::Card::LockType lock(obj, v473_lock_tmo);
 
     if (!(obj->*mt)(lock, REQ_TO_453CHAN(req), req->OFFSET / entrySize,
 		    ptr, req->ILEN / entrySize))
@@ -129,7 +129,7 @@ static STATUS readVersionDevice(RS_REQ const* const req, void* rep,
     if (offset + length > maxSize)
 	return ERR_BADOFLEN;
 
-    vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+    V473::Card::LockType lock(*obj, v473_lock_tmo);
 
     if (offset == 0) {
 	if (!(*obj)->getFirmwareVersion(lock, (uint16_t*) rep))
@@ -212,7 +212,7 @@ static STATUS readVersionDevice(RS_REQ const* const req, void* rep,
 // [0]	0x0a04	Read DAC
 // [1]	0x0a11	Read ADC
 // [2]	0x0a39	Calculation overflow count
-// 
+//
 // card-wide counters:
 //
 // [3]	0x4400	Mailbox command interrupt count
@@ -245,7 +245,7 @@ static STATUS readDiagnostics(RS_REQ const* const req, void* rep,
     if (REQ_TO_453CHAN(req) >= 4)
 	return ERR_BADCHN;
 
-    vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+    V473::Card::LockType lock(*obj, v473_lock_tmo);
 
     if (offset == 0) {
 	if (v473_debug & 1)
@@ -370,7 +370,7 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 		     return ERR_BADOFLEN;
 
 		 static size_t const rampSize = 64 * entrySize;
-		 vwpp::Lock lock((*ivs)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*ivs, v473_lock_tmo);
 
 		 if (!(*ivs)->getRamp(lock, REQ_TO_453CHAN(req),
 				      offset / rampSize + 1,
@@ -417,7 +417,7 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 		 if (offset + length > maxSize)
 		     return ERR_BADOFLEN;
 
-		 vwpp::Lock lock((*ivs)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*ivs, v473_lock_tmo);
 
 		 for (size_t ii = 0; length > 0 && ii < nTables; ++ii)
 		     if (offset < (ii + 1) * tableSize) {
@@ -455,7 +455,7 @@ static STATUS devReadSetting(short, RS_REQ const* const req,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
-		 vwpp::Lock lock((*ivs)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*ivs, v473_lock_tmo);
 
 		 return (*ivs)->getDAC(lock, chan, (uint16_t*) rep) ?
 		     NOERR : ERR_MISBOARD;
@@ -531,7 +531,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		     return ERR_BADOFLEN;
 
 		 static size_t const rampSize = 64 * entrySize;
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 if (!(*obj)->setRamp(lock, REQ_TO_453CHAN(req),
 				      offset / rampSize + 1,
@@ -579,7 +579,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		 if (offset + length > maxSize)
 		     return ERR_BADOFLEN;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 for (size_t ii = 0; length > 0 && ii < nTables; ++ii)
 		     if (offset < (ii + 1) * tableSize) {
@@ -631,7 +631,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		     return ERR_BADOFF;
 
 		 uint16_t sts;
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 if (NOERR == (*obj)->getPowerSupplyStatus(lock, chan, &sts))
 		     if (!(sts & 0x100))
@@ -666,7 +666,7 @@ static STATUS devSetting(short, RS_REQ* req, void*,
 		     return ERR_BADOFLEN;
 
 		 uint16_t curr[256];
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 if (!(*obj)->getTriggerMap(lock, 0, 0, curr, 256))
 		     return ERR_MISBOARD;
@@ -722,7 +722,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 switch (DATAS(req)) {
 		  case 1:
@@ -761,7 +761,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 result = (*obj)->setSineWaveMode(lock, chan, DATAS(req));
 	     }
@@ -782,7 +782,7 @@ static STATUS devBasicControl(short, RS_REQ const* const req, void*,
 		 if (val != 1 && val != 2)
 		     return ERR_WRBASCON;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 result = (*obj)->tclkTrigEnable(lock, val == 2);
 	     }
@@ -807,7 +807,7 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 {
     size_t const length = req->ILEN;
     size_t const offset = req->OFFSET;
- 
+
     try {
 	switch (REQ_TO_SUBCODE(req)) {
 	 case 1:
@@ -821,7 +821,7 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 return (*obj)->getPowerSupplyStatus(lock, chan,
 						     (uint16_t*) rep) ?
@@ -854,7 +854,7 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 
 		 return (*obj)->getSineWaveMode(lock, chan, (uint16_t*) rep) ?
 		     NOERR : ERR_MISBOARD;
@@ -868,7 +868,7 @@ static STATUS devBasicStatus(short, RS_REQ const* const req, void* const rep,
 		 if (offset != 0)
 		     return ERR_BADOFF;
 
-		 vwpp::Lock lock((*obj)->mutex, v473_lock_tmo);
+		 V473::Card::LockType lock(*obj, v473_lock_tmo);
 		 bool val;
 
 		 if ((*obj)->getTclkInterruptEnable(lock, &val)) {

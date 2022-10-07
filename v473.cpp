@@ -34,7 +34,7 @@ static void term()
 
 using namespace V473;
 
-bool Card::detect(vwpp::Lock const&)
+bool Card::detect(Card::LockType const&)
 {
     sysOut16(dataBuffer, 0);
     sysOut16(mailbox, 0xff00);
@@ -80,7 +80,7 @@ Card::Card(uint8_t addr, uint8_t intVec) :
     // Now that we think we're configured, let's check to see if we
     // are, indeed, a V473.
 
-    vwpp::Lock lock(mutex);
+    Card::LockType lock(this);
 
     if (!detect(lock))
 	throw std::runtime_error("VME A24 address doesn't refer to V473 "
@@ -129,7 +129,7 @@ Card::~Card()
 #endif
 }
 
-void Card::reset(vwpp::Lock const& lock)
+void Card::reset(Card::LockType const& lock)
 {
     *resetAddr = 0;
 
@@ -187,7 +187,7 @@ void Card::handlePS3Err()
     logInform1(hLog, "(V473::Card*) %p detected power supply 3 error", this);
 }
 
-uint16_t Card::getActiveInterruptLevel(vwpp::Lock const& lock)
+uint16_t Card::getActiveInterruptLevel(Card::LockType const& lock)
 {
     if (readProperty(lock, 0x4210, 1))
 	return sysIn16(dataBuffer);
@@ -229,7 +229,7 @@ void Card::generateInterrupts(bool flg)
 // with the appropriate data. Returns true if everything is
 // successful.
 
-bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
+bool Card::readProperty(Card::LockType const&, uint16_t const mb, size_t const n)
 {
     sysOut16(mailbox, lastMb = mb);
     sysOut16(count, lastCount = (uint16_t) n);
@@ -237,14 +237,17 @@ bool Card::readProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 40 milliseconds for a response.
 
-    return intDone.wait(40) && lastCmdOkay;
+    vwpp::v3_0::IntLock iLock;
+
+    return intDone.wait(iLock, 40) && lastCmdOkay;
 }
 
 // Sends the mailbox value, the word count and the SET command to the
 // hardware. When this function returns, the data buffer will hold the
 // return value.
 
-bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
+bool Card::setProperty(Card::LockType const&, uint16_t const mb,
+		       size_t const n)
 {
     sysOut16(mailbox, lastMb = mb);
     sysOut16(count, lastCount = (uint16_t) n);
@@ -252,10 +255,12 @@ bool Card::setProperty(vwpp::Lock const&, uint16_t const mb, size_t const n)
 
     // Wait up to 40 milliseconds for a response.
 
-    return intDone.wait(40) && lastCmdOkay;
+    vwpp::v3_0::IntLock iLock;
+
+    return intDone.wait(iLock, 40) && lastCmdOkay;
 }
 
-bool Card::readBank(vwpp::Lock const& lock, Channel const& chan,
+bool Card::readBank(Card::LockType const& lock, Channel const& chan,
 		    ChannelProperty const prop, uint16_t const start,
 		    uint16_t* const ptr, uint16_t const n)
 {
@@ -271,7 +276,7 @@ bool Card::readBank(vwpp::Lock const& lock, Channel const& chan,
 	return false;
 }
 
-bool Card::writeBank(vwpp::Lock const& lock, Channel const& chan,
+bool Card::writeBank(Card::LockType const& lock, Channel const& chan,
 		     ChannelProperty const prop, uint16_t const start,
 		     uint16_t const* const ptr, uint16_t const n)
 {
@@ -284,7 +289,7 @@ bool Card::writeBank(vwpp::Lock const& lock, Channel const& chan,
     return setProperty(lock, GEN_ADDR(chan, il), n);
 }
 
-bool Card::setTriggerMap(vwpp::Lock const& lock, uint16_t const intLvl,
+bool Card::setTriggerMap(Card::LockType const& lock, uint16_t const intLvl,
 			 uint8_t const events[8], size_t const n)
 {
     if (n <= 8) {
@@ -302,7 +307,7 @@ uint16_t Card::getIrqSource() const
     return sysIn16(activeIrqSource);
 }
 
-bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
+bool Card::getModuleId(Card::LockType const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -313,7 +318,7 @@ bool Card::getModuleId(vwpp::Lock const& lock, uint16_t* const ptr)
 	return false;
 }
 
-bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
+bool Card::getFirmwareVersion(Card::LockType const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -324,7 +329,7 @@ bool Card::getFirmwareVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 	return false;
 }
 
-bool Card::getFpgaVersion(vwpp::Lock const& lock, uint16_t* const ptr)
+bool Card::getFpgaVersion(Card::LockType const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -335,7 +340,7 @@ bool Card::getFpgaVersion(vwpp::Lock const& lock, uint16_t* const ptr)
 	return false;
 }
 
-bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
+bool Card::getActiveRamp(Card::LockType const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -346,7 +351,7 @@ bool Card::getActiveRamp(vwpp::Lock const& lock, uint16_t* const ptr)
 	return false;
 }
 
-bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
+bool Card::getActiveScaleFactor(Card::LockType const& lock, uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -357,7 +362,7 @@ bool Card::getActiveScaleFactor(vwpp::Lock const& lock, uint16_t* const ptr)
 	return false;
 }
 
-bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
+bool Card::getCurrentSegment(Card::LockType const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -368,7 +373,7 @@ bool Card::getCurrentSegment(vwpp::Lock const& lock, uint16_t* ptr)
 	return false;
 }
 
-bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
+bool Card::getCurrentIntLvl(Card::LockType const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -379,7 +384,7 @@ bool Card::getCurrentIntLvl(vwpp::Lock const& lock, uint16_t* ptr)
 	return false;
 }
 
-bool Card::getPowerSupplyStatus(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::getPowerSupplyStatus(Card::LockType const& lock, uint16_t const chan,
 				uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
@@ -391,7 +396,7 @@ bool Card::getPowerSupplyStatus(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
-bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
+bool Card::getLastTclkEvent(Card::LockType const& lock, uint16_t* ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -402,7 +407,7 @@ bool Card::getLastTclkEvent(vwpp::Lock const& lock, uint16_t* ptr)
 	return false;
 }
 
-bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::getDAC(Card::LockType const& lock, uint16_t const chan,
 		  uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
@@ -414,7 +419,7 @@ bool Card::getDAC(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
-bool Card::getDiagCounters(vwpp::Lock const& lock, uint16_t const start,
+bool Card::getDiagCounters(Card::LockType const& lock, uint16_t const start,
 			   uint16_t const n, uint16_t* const ptr)
 {
     if (readProperty(lock, 0x4400 + start, n)) {
@@ -425,7 +430,7 @@ bool Card::getDiagCounters(vwpp::Lock const& lock, uint16_t const start,
 	return false;
 }
 
-bool Card::getTclkInterruptEnable(vwpp::Lock const& lock, bool* const ptr)
+bool Card::getTclkInterruptEnable(Card::LockType const& lock, bool* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -436,7 +441,7 @@ bool Card::getTclkInterruptEnable(vwpp::Lock const& lock, bool* const ptr)
 	return false;
 }
 
-bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::setDAC(Card::LockType const& lock, uint16_t const chan,
 		  uint16_t const val)
 {
     assert(sysIn16(readWrite) & 2);
@@ -445,7 +450,7 @@ bool Card::setDAC(vwpp::Lock const& lock, uint16_t const chan,
     return setProperty(lock, GEN_ADDR(chan, cpDACReadWrite), 1);
 }
 
-bool Card::getADC(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::getADC(Card::LockType const& lock, uint16_t const chan,
 		  uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
@@ -457,7 +462,7 @@ bool Card::getADC(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
-bool Card::getDACUpdateRate(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::getDACUpdateRate(Card::LockType const& lock, uint16_t const chan,
 			    uint16_t* const result)
 {
     assert(sysIn16(readWrite) & 2);
@@ -469,7 +474,7 @@ bool Card::getDACUpdateRate(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
-bool Card::setDACUpdateRate(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::setDACUpdateRate(Card::LockType const& lock, uint16_t const chan,
 			    uint16_t const val)
 {
     assert(sysIn16(readWrite) & 2);
@@ -478,7 +483,7 @@ bool Card::setDACUpdateRate(vwpp::Lock const& lock, uint16_t const chan,
     return setProperty(lock, GEN_ADDR(chan, cpDACUpdateRate), 1);
 }
 
-bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::getSineWaveMode(Card::LockType const& lock, uint16_t const chan,
 			   uint16_t* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
@@ -490,7 +495,7 @@ bool Card::getSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
 	return false;
 }
 
-bool Card::setSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::setSineWaveMode(Card::LockType const& lock, uint16_t const chan,
 			   uint16_t const val)
 {
     assert(sysIn16(readWrite) & 2);
@@ -499,7 +504,7 @@ bool Card::setSineWaveMode(vwpp::Lock const& lock, uint16_t const chan,
     return setProperty(lock, GEN_ADDR(chan, cpSineWaveMode), 1);
 }
 
-bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
+bool Card::tclkTrigEnable(Card::LockType const& lock, bool const en)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -507,7 +512,7 @@ bool Card::tclkTrigEnable(vwpp::Lock const& lock, bool const en)
     return setProperty(lock, cpTclkInterruptEnable, 1);
 }
 
-bool Card::enablePowerSupply(vwpp::Lock const& lock, uint16_t const chan,
+bool Card::enablePowerSupply(Card::LockType const& lock, uint16_t const chan,
 			     bool const en)
 {
     assert(sysIn16(readWrite) & 2);
@@ -516,7 +521,7 @@ bool Card::enablePowerSupply(vwpp::Lock const& lock, uint16_t const chan,
     return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyEnable), 1);
 }
 
-bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
+bool Card::resetPowerSupply(Card::LockType const& lock, uint16_t const chan)
 {
     assert(sysIn16(readWrite) & 2);
 
@@ -524,7 +529,7 @@ bool Card::resetPowerSupply(vwpp::Lock const& lock, uint16_t const chan)
     return setProperty(lock, GEN_ADDR(chan, cpPowerSupplyReset), 1);
 }
 
-bool Card::getVmeDataBusDiag(vwpp::Lock const& lock,
+bool Card::getVmeDataBusDiag(Card::LockType const& lock,
 			     uint16_t* const ptr, uint16_t const n)
 {
     assert(sysIn16(readWrite) & 2);
@@ -537,7 +542,7 @@ bool Card::getVmeDataBusDiag(vwpp::Lock const& lock,
 	return false;
 }
 
-bool Card::setVmeDataBusDiag(vwpp::Lock const& lock,
+bool Card::setVmeDataBusDiag(Card::LockType const& lock,
 			     uint16_t const* const ptr)
 {
     assert(sysIn16(readWrite) & 2);
@@ -630,7 +635,7 @@ STATUS v473_test(V473::HANDLE const hw, uint8_t const chan)
     }
 
     try {
-	vwpp::Lock lock(hw->mutex);
+	Card::LockType lock(hw);
 
 	logInform0(hLog, "hardware is locked");
 

@@ -1,12 +1,15 @@
 #include <vxWorks.h>
 #include <stdexcept>
-#include <vwpp-1.0.h>
+#include <vwpp-3.0.h>
 #include <mooc++-4.6.h>
 
 namespace V473 {
 
     class Card {
+	vwpp::v3_0::Mutex mutex;
+
      public:
+	typedef vwpp::v3_0::Mutex::PMLock<Card, &Card::mutex> LockType;
 
 	// Create a class that wraps a `size_t` type to represent a
 	// channel number. If an instance can be created, it will hold
@@ -28,7 +31,7 @@ namespace V473 {
      private:
 	uint8_t const vecNum;
 
-	vwpp::Event intDone;
+	vwpp::v3_0::Event<> intDone;
 	bool volatile lastCmdOkay;
 
 	uint16_t* dataBuffer;
@@ -142,23 +145,23 @@ namespace V473 {
 
 	// These functions set up the transaction registers.
 
-	bool readProperty(vwpp::Lock const&, uint16_t, size_t);
-	bool setProperty(vwpp::Lock const&, uint16_t, size_t);
+	bool readProperty(LockType const&, uint16_t, size_t);
+	bool setProperty(LockType const&, uint16_t, size_t);
 
 	// Many properties in the V473 are in banks of 32 values.
 	// These functions grab any subset of a bank of values. If the
 	// range is invalid, a logic_error exception will be thrown.
 
-	bool readBank(vwpp::Lock const&, Channel const&, ChannelProperty,
+	bool readBank(LockType const&, Channel const&, ChannelProperty,
 		      uint16_t, uint16_t*, uint16_t);
-	bool writeBank(vwpp::Lock const&, Channel const&, ChannelProperty,
+	bool writeBank(LockType const&, Channel const&, ChannelProperty,
 		       uint16_t, uint16_t const*, uint16_t);
 
 	static void gblIntHandler(Card*);
 
 	void intHandler();
 
-	bool detect(vwpp::Lock const&);
+	bool detect(LockType const&);
 
      protected:
 	virtual void handleCalculationErr();
@@ -170,72 +173,70 @@ namespace V473 {
 	virtual void handlePS3Err();
 
      public:
-	vwpp::Mutex mutex;
-
 	Card(uint8_t, uint8_t);
 	virtual ~Card();
 
-	void reset(vwpp::Lock const&);
+	void reset(LockType const&);
 	void generateInterrupts(bool);
 
-	uint16_t getActiveInterruptLevel(vwpp::Lock const&);
+	uint16_t getActiveInterruptLevel(LockType const&);
 
-	bool getIntCounters(vwpp::Lock const& lock, uint16_t const start,
+	bool getIntCounters(LockType const& lock, uint16_t const start,
 			    uint16_t* const ptr, uint16_t const n)
 	{
 	    return readBank(lock, 0, cpInterruptCounter, start, ptr, n);
 	}
 
-	bool getDelays(vwpp::Lock const& lock, Channel const& chan,
+	bool getDelays(LockType const& lock, Channel const& chan,
 		       uint16_t const intLvl, uint16_t* const ptr,
 		       uint16_t const n)
 	{
 	    return readBank(lock, chan, cpDelays, intLvl, ptr, n);
 	}
 
-	bool getFrequencies(vwpp::Lock const& lock, Channel const& chan,
+	bool getFrequencies(LockType const& lock, Channel const& chan,
 			    uint16_t const intLvl, uint16_t* const ptr,
 			    uint16_t const n)
 	{
 	    return readBank(lock, chan, cpFrequencies, intLvl, ptr, n);
 	}
 
-	bool getFrequencyMap(vwpp::Lock const& lock, Channel const& chan,
+	bool getFrequencyMap(LockType const& lock, Channel const& chan,
 			     uint16_t const intLvl, uint16_t* const ptr,
 			     uint16_t const n)
 	{
 	    return readBank(lock, chan, cpFrequencyMap, intLvl, ptr, n);
 	}
 
-	bool getOffsetMap(vwpp::Lock const& lock, Channel const& chan,
+	bool getOffsetMap(LockType const& lock, Channel const& chan,
 			  uint16_t const intLvl, uint16_t* const ptr,
 			  uint16_t const n)
 	{
 	    return readBank(lock, chan, cpOffsetMap, intLvl, ptr, n);
 	}
 
-	bool getOffsets(vwpp::Lock const& lock, Channel const& chan,
+	bool getOffsets(LockType const& lock, Channel const& chan,
 			uint16_t const intLvl, uint16_t* const ptr,
 			uint16_t const n)
 	{
 	    return readBank(lock, chan, cpOffsets, intLvl, ptr, n);
 	}
 
-	bool getPhaseMap(vwpp::Lock const& lock, Channel const& chan,
+	bool getPhaseMap(LockType const& lock, Channel const& chan,
 			 uint16_t const intLvl, uint16_t* const ptr,
 			 uint16_t const n)
 	{
 	    return readBank(lock, chan, cpPhaseMap, intLvl, ptr, n);
 	}
 
-	bool getPhases(vwpp::Lock const& lock, Channel const& chan,
+	bool getPhases(LockType const& lock, Channel const& chan,
 		       uint16_t const intLvl, uint16_t* const ptr,
 		       uint16_t const n)
 	{
 	    return readBank(lock, chan, cpPhases, intLvl, ptr, n);
 	}
 
-	bool getRamp(vwpp::Lock const& lock, Channel const& chan,
+	bool getRamp(LockType const& lock, Channel const& chan,
 		     uint16_t const ramp, uint16_t const offset,
 		     uint16_t* const ptr, uint16_t const n)
 	{
@@ -246,117 +247,117 @@ namespace V473 {
 			    2 * offset, ptr, n);
 	}
 
-	bool getRampMap(vwpp::Lock const& lock, Channel const& chan,
+	bool getRampMap(LockType const& lock, Channel const& chan,
 			uint16_t const intLvl, uint16_t* const ptr,
 			uint16_t const n)
 	{
 	    return readBank(lock, chan, cpRampMap, intLvl, ptr, n);
 	}
 
-	bool getScaleFactorMap(vwpp::Lock const& lock, Channel const& chan,
+	bool getScaleFactorMap(LockType const& lock, Channel const& chan,
 			       uint16_t const intLvl, uint16_t* const ptr,
 			       uint16_t const n)
 	{
 	    return readBank(lock, chan, cpScaleFactorMap, intLvl, ptr, n);
 	}
 
-	bool getScaleFactors(vwpp::Lock const& lock, Channel const& chan,
+	bool getScaleFactors(LockType const& lock, Channel const& chan,
 			     uint16_t const intLvl, uint16_t* const ptr,
 			     uint16_t const n)
 	{
 	    return readBank(lock, chan, cpScaleFactors, intLvl + 1, ptr, n);
 	}
 
-	bool getTriggerMap(vwpp::Lock const& lock, Channel const&,
+	bool getTriggerMap(LockType const& lock, Channel const&,
 			   uint16_t const intLvl, uint16_t* const ptr,
 			   uint16_t const n)
 	{
 	    return readBank(lock, 0, cpTriggerMap, intLvl, ptr, n);
 	}
 
-	bool getVmeDataBusDiag(vwpp::Lock const& lock,
+	bool getVmeDataBusDiag(LockType const& lock,
 			       uint16_t* const ptr, uint16_t const n);
 
-	bool setVmeDataBusDiag(vwpp::Lock const& lock,
+	bool setVmeDataBusDiag(LockType const& lock,
 			       uint16_t const* const ptr);
 
 	uint16_t getIrqSource() const;
 
-	uint16_t* getDataBuffer(vwpp::Lock const&) { return dataBuffer; }
+	uint16_t* getDataBuffer(LockType const&) { return dataBuffer; }
 
-	bool getModuleId(vwpp::Lock const&, uint16_t*);
-	bool getFirmwareVersion(vwpp::Lock const&, uint16_t*);
-	bool getFpgaVersion(vwpp::Lock const&, uint16_t*);
-	bool getActiveRamp(vwpp::Lock const&, uint16_t*);
-	bool getActiveScaleFactor(vwpp::Lock const&, uint16_t*);
-	bool getCurrentSegment(vwpp::Lock const&, uint16_t*);
-	bool getCurrentIntLvl(vwpp::Lock const&, uint16_t*);
-	bool getLastTclkEvent(vwpp::Lock const&, uint16_t*);
-	bool getPowerSupplyStatus(vwpp::Lock const&, uint16_t, uint16_t*);
-	bool getTclkInterruptEnable(vwpp::Lock const&, bool*);
-	bool getDAC(vwpp::Lock const&, uint16_t, uint16_t*);
-	bool getDiagCounters(vwpp::Lock const&, uint16_t, uint16_t, uint16_t*);
-	bool setDAC(vwpp::Lock const&, uint16_t, uint16_t);
-	bool getADC(vwpp::Lock const&, uint16_t, uint16_t*);
+	bool getModuleId(LockType const&, uint16_t*);
+	bool getFirmwareVersion(LockType const&, uint16_t*);
+	bool getFpgaVersion(LockType const&, uint16_t*);
+	bool getActiveRamp(LockType const&, uint16_t*);
+	bool getActiveScaleFactor(LockType const&, uint16_t*);
+	bool getCurrentSegment(LockType const&, uint16_t*);
+	bool getCurrentIntLvl(LockType const&, uint16_t*);
+	bool getLastTclkEvent(LockType const&, uint16_t*);
+	bool getPowerSupplyStatus(LockType const&, uint16_t, uint16_t*);
+	bool getTclkInterruptEnable(LockType const&, bool*);
+	bool getDAC(LockType const&, uint16_t, uint16_t*);
+	bool getDiagCounters(LockType const&, uint16_t, uint16_t, uint16_t*);
+	bool setDAC(LockType const&, uint16_t, uint16_t);
+	bool getADC(LockType const&, uint16_t, uint16_t*);
 
-	bool enablePowerSupply(vwpp::Lock const&, uint16_t, bool);
-	bool resetPowerSupply(vwpp::Lock const&, uint16_t);
+	bool enablePowerSupply(LockType const&, uint16_t, bool);
+	bool resetPowerSupply(LockType const&, uint16_t);
 
-	bool getDACUpdateRate(vwpp::Lock const&, uint16_t, uint16_t*);
-	bool setDACUpdateRate(vwpp::Lock const&, uint16_t, uint16_t);
+	bool getDACUpdateRate(LockType const&, uint16_t, uint16_t*);
+	bool setDACUpdateRate(LockType const&, uint16_t, uint16_t);
 
-	bool getSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t*);
-	bool setSineWaveMode(vwpp::Lock const&, uint16_t, uint16_t);
-	bool setDelays(vwpp::Lock const& lock, Channel const& chan,
+	bool getSineWaveMode(LockType const&, uint16_t, uint16_t*);
+	bool setSineWaveMode(LockType const&, uint16_t, uint16_t);
+	bool setDelays(LockType const& lock, Channel const& chan,
 		       uint16_t const intLvl, uint16_t const* const ptr,
 		       uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpDelays, intLvl, ptr, n);
 	}
 
-	bool setFrequencies(vwpp::Lock const& lock, Channel const& chan,
+	bool setFrequencies(LockType const& lock, Channel const& chan,
 			    uint16_t const intLvl, uint16_t const* const ptr,
 			    uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpFrequencies, intLvl, ptr, n);
 	}
 
-	bool setFrequencyMap(vwpp::Lock const& lock, Channel const& chan,
+	bool setFrequencyMap(LockType const& lock, Channel const& chan,
 			     uint16_t const intLvl, uint16_t const* const ptr,
 			     uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpFrequencyMap, intLvl, ptr, n);
 	}
 
-	bool setOffsetMap(vwpp::Lock const& lock, Channel const& chan,
+	bool setOffsetMap(LockType const& lock, Channel const& chan,
 			  uint16_t const intLvl, uint16_t const* const ptr,
 			  uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpOffsetMap, intLvl, ptr, n);
 	}
 
-	bool setOffsets(vwpp::Lock const& lock, Channel const& chan,
+	bool setOffsets(LockType const& lock, Channel const& chan,
 			uint16_t const intLvl, uint16_t const* const ptr,
 			uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpOffsets, intLvl, ptr, n);
 	}
 
-	bool setPhaseMap(vwpp::Lock const& lock, Channel const& chan,
+	bool setPhaseMap(LockType const& lock, Channel const& chan,
 			 uint16_t const intLvl, uint16_t const* const ptr,
 			 uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpPhaseMap, intLvl, ptr, n);
 	}
 
-	bool setPhases(vwpp::Lock const& lock, Channel const& chan,
+	bool setPhases(LockType const& lock, Channel const& chan,
 		       uint16_t const intLvl, uint16_t const* const ptr,
 		       uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpPhases, intLvl, ptr, n);
 	}
 
-	bool setRamp(vwpp::Lock const& lock, Channel const& chan,
+	bool setRamp(LockType const& lock, Channel const& chan,
 		     uint16_t const ramp, uint16_t const offset,
 		     uint16_t const* const ptr, uint16_t const n)
 	{
@@ -366,35 +367,35 @@ namespace V473 {
 			     2 * offset, ptr, n);
 	}
 
-	bool setRampMap(vwpp::Lock const& lock, Channel const& chan,
+	bool setRampMap(LockType const& lock, Channel const& chan,
 			uint16_t const intLvl, uint16_t const* const ptr,
 			uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpRampMap, intLvl, ptr, n);
 	}
 
-	bool setScaleFactorMap(vwpp::Lock const& lock, Channel const& chan,
+	bool setScaleFactorMap(LockType const& lock, Channel const& chan,
 			       uint16_t const intLvl, uint16_t const* const ptr,
 			       uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpScaleFactorMap, intLvl, ptr, n);
 	}
 
-	bool setTriggerMap(vwpp::Lock const& lock, Channel const&,
+	bool setTriggerMap(LockType const& lock, Channel const&,
 			   uint16_t const intLvl, uint16_t const* const ptr,
 			   uint16_t const n)
 	{
 	    return writeBank(lock, 0, cpTriggerMap, intLvl, ptr, n);
 	}
 
-	bool setScaleFactors(vwpp::Lock const& lock, Channel const& chan,
+	bool setScaleFactors(LockType const& lock, Channel const& chan,
 			     uint16_t const intLvl, uint16_t const* const ptr,
 			     uint16_t const n)
 	{
 	    return writeBank(lock, chan, cpScaleFactors, intLvl + 1, ptr, n);
 	}
 
-	bool sineWaveMode(vwpp::Lock const& lock, Channel const& chan,
+	bool sineWaveMode(LockType const& lock, Channel const& chan,
 			  SineMode const mode)
 	{
 	    uint16_t const tmp = static_cast<uint16_t>(mode);
@@ -402,7 +403,7 @@ namespace V473 {
 	    return writeBank(lock, chan, cpSineWaveMode, 0, &tmp, 1);
 	}
 
-	bool waveformEnable(vwpp::Lock const& lock, Channel const& chan,
+	bool waveformEnable(LockType const& lock, Channel const& chan,
 			    bool const en)
 	{
 	    uint16_t const tmp = static_cast<uint16_t>(en);
@@ -410,8 +411,8 @@ namespace V473 {
 	    return writeBank(lock, chan, cpWaveformEnable, 0, &tmp, 1);
 	}
 
-	bool tclkTrigEnable(vwpp::Lock const&, bool);
-	bool setTriggerMap(vwpp::Lock const&, uint16_t,
+	bool tclkTrigEnable(LockType const&, bool);
+	bool setTriggerMap(LockType const&, uint16_t,
 			   uint8_t const[8], size_t);
     };
 
