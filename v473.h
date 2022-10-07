@@ -114,8 +114,7 @@ namespace V473 {
 
 	 public:
 	    IntLevel(size_t const v, ChannelProperty const& p) :
-		value((p == cpTriggerMap && v < 256) ||
-		      (p != cpTriggerMap && v < 32) ?
+		value(v < 32 || (p == cpTriggerMap && v < 256) ?
 		      v : throw int16_t(ERR_BADSLOT)),
 		pvalue(p)
 	    {}
